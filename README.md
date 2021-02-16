@@ -41,7 +41,7 @@ pictures…link
 | RX    | D17   | D4      |
 | VCC   | 3.3V  | 3.3V    |
 
-
+![test](Docs/Image/Pinouts_ESP32-LC12s_v1.jpg)
 **Picture:**  
 [ESP32 to LC12s Pinsouts](https://ibb.co/tppN1LN)
 
