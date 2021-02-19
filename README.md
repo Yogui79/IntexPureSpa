@@ -27,7 +27,7 @@ Videos and pictures coming soon...
     -   ArduinoOTA
     -   MySensors (optional)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
--   **[Download](Code/Spa.ino) the PureSpa Code**
+-   **[Download](Code/Spa/Spa.ino) the PureSpa Code**
 
 ## Pinouts
 
@@ -77,9 +77,10 @@ const char* Mypassword = "YourPassword";
 
 -   Topic is the path to communtions over MQTT:  
     e.g.:  _**IntexSpa/Cmd Power on off**_
--   Payload is the  **ON**  or  **OFF**  command.  **ON = 1, OFF = 0**
+-   Payload is the command 
 
-| Description                  | Topic String                     | Payload | Payload | Only Send Value |
+
+| Description                  | Topic String                     | Payload | Payload | Only Status           |
 |------------------------------|----------------------------------|---------|---------|-----------------|
 | **Power**                    | IntexSpa/Cmd Power on off        | ON=1    | OFF=0   | -               |
 | **Water Filter**             | IntexSpa/Cmd water filter on off | ON=1    | OFF=0   | -               |
@@ -91,14 +92,20 @@ const char* Mypassword = "YourPassword";
 | **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |
 | **Setpoint Temp.**           | IntexSpa/Temperature Setpoint    | -       | -       | Yes             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
-| **Send Error Message**       | IntexSpa/Error Number            | -       | -       | Yes  
+| **Send Error Message**       | IntexSpa/Error Number            | -       | -       | Yes             |
+| **Status Power on**          | IntexSpa/Power on                | -       | -       | Yes             |  
+| **Status Bubble on**         | IntexSpa/Bubble on               | -       | -       | Yes             |  
+| **Status Heater on**         | IntexSpa/heater on               | -       | -       | Yes             |  
+| **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |  
 
 ***Only for Spa #28458 #28462***
 
-| Description | Topic String                   | Payload | Payload | Only Send Value |
+| Description | Topic String                   | Payload | Payload | Only Status          |
 |-------------|--------------------------------|---------|---------|-----------------|
-| Water Jet   |  IntexSpa/Cmd water jet on off | ON=1    | OFF=0   | -               |
-| Sanizer               | IntexSpa/Cmd sanizer on off    | ON=1    | OFF=0   | -               |
+| **Water Jet**             |  IntexSpa/Cmd water jet on off | ON=1    | OFF=0   | -               |
+| **Sanizer**               | IntexSpa/Cmd sanizer on off    | ON=1    | OFF=0   | -               |
+| **Status Water Jet**      | IntexSpa/Water jet on          | -       | -       | Yes             |
+| **Status Sanizer**        | IntexSpa/Sanizer on            | -       | -       | Yes             |
 
 
 
