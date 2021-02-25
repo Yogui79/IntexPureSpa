@@ -72,7 +72,6 @@ const char* Mypassword = "YourPassword";
 ```
 
 ----------
-| **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lose connects       |    
 
 **MQTT topic & payload**
 
