@@ -72,6 +72,7 @@ const char* Mypassword = "YourPassword";
 ```
 
 ----------
+| **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lose connects       |    
 
 **MQTT topic & payload**
 
@@ -88,7 +89,9 @@ const char* Mypassword = "YourPassword";
 | **Heater**                   | IntexSpa/Cmd heater on off       | ON=1    | OFF=0   | -               |
 | **Change Farenheit/Celsius** | IntexSpa/Cmd Farenheit Celsius   | F=1     | C=0     | -               |
 | **Decrease the Temp.**       | IntexSpa/Cmd decrease            | UP=1    | -       | -               |
-| **Increase the Temp.**       | IntexSpa/Cmd increase            | Down=1  | -       | -               |              |
+| **Increase the Temp.**       | IntexSpa/Cmd increase            | Down=1  | -       | -  
+| **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |              |
+| **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
 | **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |
 | **Setpoint Temp.**           | IntexSpa/Temperature Setpoint    | -       | -       | Yes             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
@@ -97,6 +100,7 @@ const char* Mypassword = "YourPassword";
 | **Status Bubble on**         | IntexSpa/Bubble on               | -       | -       | Yes             |  
 | **Status Heater on**         | IntexSpa/heater on               | -       | -       | Yes             |  
 | **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |  
+
 
 ***Only for Spa #28458 #28462***
 
@@ -130,6 +134,194 @@ You can use OTA update (wireless) via Arduino IDE after the first upload via USB
 ## Changing ID and automatically search
 
 ## Home Assistant
+Is a powerful open source home automation software. [www.home-assistant.io](https://www.home-assistant.io)
+
+You can use it as you want, I'll show you an example of a part of the files configuration.yaml and automations.yaml
+
+
+**Screenshot:**
+
+comming soon...
+
+**configuration.yaml**
+
+Define the switches and sensors with MQTT Topics and Payload.
+
+```csharp
+#Switch MQTT
+switch:
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Power on off
+    state_topic: IntexSpa/Power on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Einschalten"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd water filter on off
+    state_topic: IntexSpa/filter on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Filter"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd bubble on off
+    state_topic: IntexSpa/Bubble on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Bubble"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd heater on off
+    state_topic: IntexSpa/heater on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Heizung"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd decrease
+    state_topic: IntexSpa/Cmd decrease
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Runter-"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd increase
+    state_topic: IntexSpa/Cmd increase
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Rauf+"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd water jet on off
+    state_topic: IntexSpa/Water jet on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Jet-Duesen"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd sanizer on off
+    state_topic: IntexSpa/Sanizer on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Desinfektion"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Reset ESP
+    state_topic: IntexSpa/Cmd Reset ESP
+    payload_on: "reset"
+    payload_off: " "
+    name: "Reset ESP-script-switch"
+
+#Sensor
+sensor:
+  - platform: mqtt
+    name: "Status"
+    state_topic: "IntexSpa/Error Number"
+    unit_of_measurement: 'E'
+  - platform: mqtt
+    name: "Aktuelle Temp."
+    state_topic: "IntexSpa/Actual Temperature"
+    unit_of_measurement: '°c'
+  - platform: mqtt
+    name: "Set Temp."
+    state_topic: "IntexSpa/Temperature Setpoint"
+    unit_of_measurement: '°c'
+  - platform: mqtt
+    name: "IntexSpa_Kommunikation mit Pumpe"
+    state_topic: "IntexSpa/Communication with pump"
+    
+#Template Sensor   
+  - platform: template
+    sensors:
+      intexstatustemplate:
+        friendly_name: "Intex Status Template"
+        value_template: >-
+          {% if is_state('sensor.status','0') %}
+            OK
+          {% else %}
+            E 
+            {{ states('sensor.status') }}
+          {% endif %}
+  - platform: template
+    sensors:
+      intexkommunikationmitpumpetemplate:
+        friendly_name: "Intex Kommunikation mit Pumpe - Template"
+        value_template: >-
+          {% if is_state('sensor.intexspa_kommunikation_mit_pumpe','1') %}
+            OK
+          {% else %}
+            Keine Verbindung
+          {% endif %}
+```
+**automations.yaml** (optional)
+
+All your automation settings such as push-notification on your mobile phone.
+```csharp
+- service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool
+      message: Whirlpool ist eingeschalten
+  mode: single
+- id: 'xxxxx'
+  alias: Push-Notify/Whirlpool Heizung Einschalten
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.intex_heizung
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool Heizung
+      message: Die Heizung ist eingeschalten!
+  mode: single
+- id: 'xxxxxxx'
+  alias: Push-Notify/Whirlpool Set. Temp >33°C
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: IntexSpa/Temperature Setpoint
+    payload: '33'
+  condition: []
+  action:
+  - service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool Set. Temp
+      message: Die eingestellte Temperatur ist über 33°C
+  mode: single
+- id: 'xxxxxxx'
+  alias: Push-Notify/Whirlpool Aktuelle Temp >34°C
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: IntexSpa/Actual Temperature
+    payload: '34'
+  condition: []
+  action:
+  - service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool Aktuelle Temperatur
+      message: Die Aktuelle Temperatur ist über 34°C
+  mode: single
+- id: 'xxxxxxxx'
+  alias: Push-Notify/Whirlpool Error Meldungen
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.status
+    above: '0'
+  condition: []
+  action:
+  - service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool Error
+      message: ACHTUNG! Whirlpool Error {{ states('sensor.status') }}
+  mode: single
+```
+
 
 ## Jeedom
 
