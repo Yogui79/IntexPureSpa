@@ -50,7 +50,7 @@
 //#define _MY_SENSORS_
 #define _MQTT_
 
-#ifdef _MQTT_
+#ifdef ESP32
 const char* Myssid = "MySSID";
 const char* Mypassword = "MyPassword";
 #endif
@@ -74,11 +74,11 @@ EspMQTTClient client(
 );
 #endif
 
-//Enable following line to have some debug infos
-
+//Uncomment following line to have more debug infos
 //#define DEBUG_RECIEVED_DATA
-#define DEBUG_SEND_COMMAND
-#define DEBUG_PUMP_DATA
+//#define DEBUG_SEARCH_CHANNEL
+//#define DEBUG_SEND_COMMAND
+//#define DEBUG_PUMP_DATA
 //#define DEBUG_CONFIG
 #define DEBUG_MQTT
 //#define DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW
@@ -90,7 +90,8 @@ EspMQTTClient client(
 bool FirstSend;
 
 #include <Timer.h>
-
+#include "EEPROM.h"
+#define EEPROM_SIZE       64
 #if defined (__AVR__) 
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(2, 4); // RX, TX
@@ -107,16 +108,7 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #include <ArduinoOTA.h>
 #endif
 
-
 //Command
-#if defined (_28442_28440_)
-#define FIRST_COMMAND_BYTE          0xC9
-#define FIRST_PUMP_BYTE             0XC9
-#elif defined (_28458_28462_)
-#define FIRST_COMMAND_BYTE          0x1A
-#define FIRST_PUMP_BYTE             0X1A
-#endif
-
 #define COMMAND_ON_OFF              0x0001    
 #define COMMAND_WATER_FILTER        0x0010    
 #define COMMAND_BUBBLE              0x0020    
@@ -200,7 +192,14 @@ bool CommandRecived;
 long LastTimeReciveData;
 bool ErrorCommunicationWithPump;
 long LastTimeSendData;
+long LastTimeReciveDataCheckChannel;
+char ActualSearchChannel;
+uint16_t SearchChannelDataCount; 
+char UsedChannel;
+char FirstCommandChar;
+uint16_t ChannelChangeOk;
 
+//Setup
 void setup() {
  
   mySerial.begin(9600);
@@ -259,8 +258,28 @@ void setup() {
   digitalWrite(DO_CS, LOW);     
   digitalWrite(DO_SET, LOW);
   delay(100);
-  // Configure LC12s
-  SetSettings();
+
+  //read channel inside EERPOM 
+#ifdef ESP32  
+  if (!EEPROM.begin(EEPROM_SIZE))
+  {
+    Serial.println("failed to initialise EEPROM"); delay(1000000);
+  }
+#endif  
+  UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):0 ;
+  FirstCommandChar = EEPROM.read(18);
+  
+   Serial.print (F("Used Channel read from EEPROM 0x"));
+  Serial.println(UsedChannel,HEX);
+  
+  // Configure LC12s if a channel is known
+  if (UsedChannel){
+    SetSettings(UsedChannel);
+  }
+  else{ //else search the used channel
+     Serial.println (F("No channel saved in the EEPROM"));
+     while (!SearchChannel());     
+  }
 //configure send alive timer  
 #ifdef  __AVR__    
   t.every(800, SendLifeFct, (void*)0); // only the alf time due to softwareserial
@@ -269,7 +288,7 @@ void setup() {
   t.every(1600, SendLifeFct, (void*)0);
 #endif  
   LastTimeReciveData = LastTimeSendData= millis();
-}
+}// void setup()
 
 void loop() {
 #ifdef DEBUG_RECIEVED_DATA   
@@ -304,7 +323,7 @@ void loop() {
         ReadData(c);
 #ifdef DEBUG_RECIEVED_DATA
         sprintf(&res[0],"%02X",c);
-        if (c == FIRST_COMMAND_BYTE || c == FIRST_PUMP_BYTE){
+        if (c == FirstCommandChar){
           Serial.println(" ");
         }
           
@@ -323,10 +342,8 @@ void loop() {
      if (client.isConnected())
  #endif
      {
-
        DataManagement();
        SendCommandManagement (&CommandToSend);
-
        state =0;
        FirstSend = true;
        FinishPumpMessage = false;  
@@ -345,6 +362,11 @@ void loop() {
 #endif   
 #ifdef _MQTT_
   client.loop();
+  if (   !client.isConnected()
+      && !FirstSend 
+     ){
+      LastTimeReciveData = millis();
+     }
 #endif
   // check communication pump timeout
   if (millis() - LastTimeReciveData > 2000 ){
@@ -355,7 +377,47 @@ void loop() {
     SendValue("IntexSpa/Communication with pump", true,ID_COM_PUMP); 
     ErrorCommunicationWithPump = false;
   }
-  
+   
+  //Try to find the new channel in case of pump change channel
+  if (   !FirstSend 
+      &&  (millis() - LastTimeReciveData > 2000 )
+#ifdef _MQTT_ 
+      &&  client.isConnected()      
+#endif
+     ){
+#if defined (_28458_28462_)
+     if (ChannelChangeOk == 1){ 
+        ActualSearchChannel =UsedChannel+1;
+     }
+#elif defined  (_28442_28440_)
+     if (ChannelChangeOk == 1){ 
+        LastTimeReciveData = millis();
+        ChannelChangeOk++;
+        FirstCommandChar ++;
+        EEPROM.write(18, FirstCommandChar);
+        EEPROM.commit();
+        Serial.println (F("Try next first Command char"));
+        return;
+     }
+     else if (ChannelChangeOk > 1)
+        ActualSearchChannel =UsedChannel+1;
+#endif
+     else{
+        ActualSearchChannel =UsedChannel -10;
+     }
+     UsedChannel=0;
+     ChannelChangeOk = 0;
+     Serial.println (F("Look like channel change since last boot"));
+#ifdef _MQTT_
+     client.publish("IntexSpa/Notification", "Search the device"); 
+#endif     
+     while (!UsedChannel &&  (millis() - LastTimeReciveData < 420000 ))
+       SearchChannel();
+#ifdef _MQTT_
+     if (UsedChannel)
+      client.publish("IntexSpa/Notification", "Device found"); 
+#endif      
+  }
 
 }
 
@@ -370,7 +432,7 @@ void ReadData (unsigned char c)
         memset (&Data,0,sizeof(Data));
         memset (&DataControler,0,sizeof(DataControler));
         
-        if (c == FIRST_PUMP_BYTE)
+        if (c == FirstCommandChar)
         {
           Data[DataCounter] =c;
           DataCounter++;
@@ -386,11 +448,9 @@ void ReadData (unsigned char c)
 
         //it was a message from controler usefull in case of Controler message and pump message start with the same value
         //resete to second byte to continue to read store pump message
-        if (c == FIRST_COMMAND_BYTE && DataCounter< SIZE_PUMP_DATA )
-        {
-       
-          memcpy (&DataControler,&Data, 8);
-          
+        if (c == FirstCommandChar && DataCounter< SIZE_PUMP_DATA )
+        {     
+          memcpy (&DataControler,&Data, 8);          
           //Calclulate an check Checksum
           uint16_t crc_out = calc_crc((char*) DataControler,SIZE_CONTROLLER_DATA -2);      
           //Checksum ok
@@ -404,8 +464,7 @@ void ReadData (unsigned char c)
           {
             FinishControllerMessage = false;
           }
-          
-          
+         
           DataCounter = 0;
           Data[DataCounter] =c;
           DataCounter++;
@@ -413,7 +472,6 @@ void ReadData (unsigned char c)
         // wait until full message is recived
         if (DataCounter> SIZE_PUMP_DATA-1)
         {
-
           //Calclulate an check Checksum
           uint16_t crc_out = calc_crc((char*)Data,SIZE_PUMP_DATA -2);      
           //Checksum ok
@@ -426,12 +484,10 @@ void ReadData (unsigned char c)
           }
           else{ // Wrong Cheksum
             state =0;
-          }
-          
+          }         
         }
         break;
       }
-     
    }
 }  
 #ifdef _MQTT_
@@ -440,7 +496,7 @@ void onConnectionEstablished()
    //manage command power on/off
    client.subscribe("IntexSpa/Cmd Power on off", [](const String & payload) {
     if (payload== "1" || payload== "0"){
-      CommandToSend = COMMAND_ON_OFF ;
+      CommandToSend |= COMMAND_ON_OFF ;
       LastTimeSendData = millis();
     }
   });
@@ -500,6 +556,14 @@ void onConnectionEstablished()
       CommandToSend |= COMMAND_INCREASE;
       }
     }
+  });   
+
+   // reset
+   client.subscribe("IntexSpa/Cmd Reset ESP", [](const String & payload) {
+    if (payload== "reset"){
+      ESP.restart();
+    }
+
   });   
 
 
@@ -587,9 +651,6 @@ void DataManagement (){
   else{
     CommandRecived = false;
   }
-
-
-
 }
 
 
@@ -610,15 +671,12 @@ void SendCommandManagement (uint16_t *Command){
      ||  (millis() -LastTimeSendData> 600)
     )
   {
-     *Command = 0x0000;
+    *Command = 0x0000;
     return;
   }
   SendCommand(*Command);
   
 }
-
-
-
 
 void SendLifeFct(void *context)
 {
@@ -636,7 +694,7 @@ void SendCommand(uint16_t Command){
 #ifdef DEBUG_SEND_COMMAND 
   char res[5];
 #endif  
-  SendData[0] = FIRST_COMMAND_BYTE;
+  SendData[0] = FirstCommandChar;
   SendData[1] = (Command & 0xFF00) >> 8;;
   SendData[2] = Command  & 0x00FFF;
   SendData[3] = ControllerLoadingState;  
@@ -661,8 +719,79 @@ void SendCommand(uint16_t Command){
 #endif    
 }
 
+//search channel
+bool SearchChannel(){
+#ifdef DEBUG_SEARCH_CHANNEL 
+  char res[5];
+#endif  
 
-void SetSettings(){
+#ifdef __AVR__
+  //in case of overflow
+  if ( mySerial.overflow() ) 
+  {
+    state = 0;
+    DataCounter=0;
+    while ( mySerial.available())
+      mySerial.read();
+  }
+  else
+#endif    
+  {
+     if (millis() - LastTimeReciveDataCheckChannel >1000) 
+     {
+        SearchChannelDataCount =0;
+        if (ActualSearchChannel<128){
+          SetSettings(ActualSearchChannel++);
+        }else{
+          ActualSearchChannel=0;
+          SetSettings(ActualSearchChannel++);
+        }        
+     } 
+          
+     if (mySerial.available() ) 
+     {
+      unsigned char c = mySerial.read();
+      LastTimeReciveDataCheckChannel = millis();
+      SearchChannelDataCount++;
+#ifdef DEBUG_SEARCH_CHANNEL
+      sprintf(&res[0],"%02X",c); 
+      if (c==0xAA)
+        Serial.println(F(""));
+      Serial.print(res);
+      Serial.print(F(" "));
+#endif
+      if (SearchChannelDataCount >1500){
+        ChannelChangeOk ++;
+        UsedChannel = ActualSearchChannel-1; // due to autoamtic add inside the search function
+        LastTimeReciveData = LastTimeSendData= millis();
+#if defined (_28458_28462_)
+        FirstCommandChar = UsedChannel;
+#elif defined  (_28442_28440_)
+        FirstCommandChar = UsedChannel + 0x7F;
+#endif        
+        if (UsedChannel){
+          EEPROM.write(17, UsedChannel);
+          EEPROM.write(18, FirstCommandChar);
+          EEPROM.commit();
+        }
+        
+#ifdef DEBUG_SEARCH_CHANNEL
+        sprintf(&res[0],"%02X",UsedChannel);
+        Serial.println(F(""));
+        Serial.print(F("Found channel 0x"));
+        Serial.println(res);
+#endif  
+        return true;             
+      }
+     }
+     
+   }
+   return false;
+}
+
+
+// Set settings
+void SetSettings(char Channel){
   byte Config[20];
 #ifdef DEBUG_CONFIG  
   char res[5];
@@ -697,13 +826,8 @@ void SetSettings(){
   Config[10]=0x04; 
   
   Config[11]=0x00;
-  //chanel
-#ifdef _28442_28440_   
-  Config[12]=0x4A;
-#endif
-#ifdef _28458_28462_   
-  Config[12]=FIRST_COMMAND_BYTE;
-#endif
+  //Channel
+   Config[12]=Channel;
   
   Config[13]=0x00;
   Config[14]=0x00;
