@@ -20,11 +20,11 @@ Videos and pictures coming soon...
 -   **Install the “[ESP32 Dev Kit C V4](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)” Board for Arduino IDE**  ->  [Screenshot](Docs/Image/Board-Screenshot-IDE.PNG)
 -   **Install the following libraries**  (search in the Arduino IDE in libraries)
     -   EspMQTTClient.h
-    -   Timer …link… (new?)
-    -   SoftwareSerial
+    -   arduino-timer.h
     -   WiFi
     -   ESPmDNS
     -   ArduinoOTA
+    -   SoftwareSerial (only for Arduino)
     -   MySensors (optional)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
 -   **[Download](Code/Spa/Spa.ino) the PureSpa Code**
@@ -139,187 +139,23 @@ You can use it as you want, I'll show you an example of a part of the files conf
 
 
 **Screenshot:**
+1. [OFF - Whrilpool Screenshot](Docs/Image/1.HomeAssistant-OFF_Screenshot.jpg) 
+2. [ON - Whrilpool Screenshot](Docs/Image/2.HomeAssistant-ON_Screenshot.jpg)
+3. [Help/Infos/Reset Screenshot](Docs/Image/3.HomeAssistant-Help-Infos_Screenshot.jpg)
+4. [Push-notification Screenshot](Docs/Image/4.HomeAssistant-Push-notification_Screenshot.jpg)
 
-comming soon...
+<<<<<<< HEAD
+=======
+![OFF Screenshot](Docs/Image/1.HomeAssistant-OFF_Screenshot.jpg) ![ON Screenshot](Docs/Image/2.HomeAssistant-ON_Screenshot.jpg)
+>>>>>>> 58999caf3f045ed5dc4a4bb0fa4870467ca3c1ac
 
-**configuration.yaml**
+**Config of Home Assistant:** 
+- **[configuration.yaml]([automations.yaml](Code/HomeAutomation/HomeAssistant/configuration.yaml) (optional))**
+   - Define the switches and sensors with MQTT Topics and Payload.
 
-Define the switches and sensors with MQTT Topics and Payload.
+- **[automations.yaml](Code/HomeAutomation/HomeAssistant/automations.yaml) (optional)**
 
-```csharp
-#Switch MQTT
-switch:
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd Power on off
-    state_topic: IntexSpa/Power on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Einschalten"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd water filter on off
-    state_topic: IntexSpa/filter on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Filter"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd bubble on off
-    state_topic: IntexSpa/Bubble on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Bubble"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd heater on off
-    state_topic: IntexSpa/heater on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Heizung"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd decrease
-    state_topic: IntexSpa/Cmd decrease
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Runter-"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd increase
-    state_topic: IntexSpa/Cmd increase
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Rauf+"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd water jet on off
-    state_topic: IntexSpa/Water jet on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Jet-Duesen"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd sanizer on off
-    state_topic: IntexSpa/Sanizer on
-    payload_on: "1"
-    payload_off: "0"
-    name: "Intex_Desinfektion"
-    
-  - platform: mqtt
-    command_topic: IntexSpa/Cmd Reset ESP
-    state_topic: IntexSpa/Cmd Reset ESP
-    payload_on: "reset"
-    payload_off: " "
-    name: "Reset ESP-script-switch"
-
-#Sensor
-sensor:
-  - platform: mqtt
-    name: "Status"
-    state_topic: "IntexSpa/Error Number"
-    unit_of_measurement: 'E'
-  - platform: mqtt
-    name: "Aktuelle Temp."
-    state_topic: "IntexSpa/Actual Temperature"
-    unit_of_measurement: '°c'
-  - platform: mqtt
-    name: "Set Temp."
-    state_topic: "IntexSpa/Temperature Setpoint"
-    unit_of_measurement: '°c'
-  - platform: mqtt
-    name: "IntexSpa_Kommunikation mit Pumpe"
-    state_topic: "IntexSpa/Communication with pump"
-    
-#Template Sensor   
-  - platform: template
-    sensors:
-      intexstatustemplate:
-        friendly_name: "Intex Status Template"
-        value_template: >-
-          {% if is_state('sensor.status','0') %}
-            OK
-          {% else %}
-            E 
-            {{ states('sensor.status') }}
-          {% endif %}
-  - platform: template
-    sensors:
-      intexkommunikationmitpumpetemplate:
-        friendly_name: "Intex Kommunikation mit Pumpe - Template"
-        value_template: >-
-          {% if is_state('sensor.intexspa_kommunikation_mit_pumpe','1') %}
-            OK
-          {% else %}
-            Keine Verbindung
-          {% endif %}
-```
-**automations.yaml** (optional)
-
-All your automation settings such as push-notification on your mobile phone.
-```csharp
-- service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool
-      message: Whirlpool ist eingeschalten
-  mode: single
-- id: 'xxxxx'
-  alias: Push-Notify/Whirlpool Heizung Einschalten
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: switch.intex_heizung
-    from: 'off'
-    to: 'on'
-  condition: []
-  action:
-  - service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool Heizung
-      message: Die Heizung ist eingeschalten!
-  mode: single
-- id: 'xxxxxxx'
-  alias: Push-Notify/Whirlpool Set. Temp >33°C
-  description: ''
-  trigger:
-  - platform: mqtt
-    topic: IntexSpa/Temperature Setpoint
-    payload: '33'
-  condition: []
-  action:
-  - service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool Set. Temp
-      message: Die eingestellte Temperatur ist über 33°C
-  mode: single
-- id: 'xxxxxxx'
-  alias: Push-Notify/Whirlpool Aktuelle Temp >34°C
-  description: ''
-  trigger:
-  - platform: mqtt
-    topic: IntexSpa/Actual Temperature
-    payload: '34'
-  condition: []
-  action:
-  - service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool Aktuelle Temperatur
-      message: Die Aktuelle Temperatur ist über 34°C
-  mode: single
-- id: 'xxxxxxxx'
-  alias: Push-Notify/Whirlpool Error Meldungen
-  description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.status
-    above: '0'
-  condition: []
-  action:
-  - service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool Error
-      message: ACHTUNG! Whirlpool Error {{ states('sensor.status') }}
-  mode: single
-```
+  - All your automation settings such as push-notification on your mobile phone.
 
 
 ## Jeedom
