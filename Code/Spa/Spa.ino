@@ -89,7 +89,7 @@ EspMQTTClient client(
 #endif
 bool FirstSend;
 
-#include <Timer.h>
+#include <arduino-timer.h>
 #include "EEPROM.h"
 #define EEPROM_SIZE       64
 #if defined (__AVR__) 
@@ -181,7 +181,7 @@ unsigned char Data[SIZE_PUMP_DATA +2];
 uint16_t DataCounter=0;
 
 //internal variables
-Timer t;
+auto t = timer_create_default(); // create a timer with default settings
 bool FinishPumpMessage;
 bool FinishControllerMessage;
 char ControllerLoadingState;
@@ -285,7 +285,7 @@ void setup() {
   t.every(800, SendLifeFct, (void*)0); // only the alf time due to softwareserial
 #endif
 #ifdef  ESP32    
-  t.every(1600, SendLifeFct, (void*)0);
+  t.every(1600, SendLifeFct);
 #endif  
   LastTimeReciveData = LastTimeSendData= millis();
 }// void setup()
@@ -295,7 +295,7 @@ void loop() {
    char res[5];  
 #endif
    //update timer
-   t.update();
+   t.tick();
 #ifdef  __AVR__  
    mySerial.listen();
 #endif
@@ -678,7 +678,7 @@ void SendCommandManagement (uint16_t *Command){
   
 }
 
-void SendLifeFct(void *context)
+bool SendLifeFct(void *)
 {
 #ifdef _MQTT_ 
     if (client.isConnected() && !ErrorCommunicationWithPump)
@@ -686,6 +686,7 @@ void SendLifeFct(void *context)
     {
       SendCommand(0x0000);
     }
+    return true;
 }
 
 void SendCommand(uint16_t Command){
