@@ -144,10 +144,6 @@ You can use it as you want, I'll show you an example of a part of the files conf
 3. [Help/Infos/Reset Screenshot](Docs/Image/3.HomeAssistant-Help-Infos_Screenshot.jpg)
 4. [Push-notification Screenshot](Docs/Image/4.HomeAssistant-Push-notification_Screenshot.jpg)
 
-<<<<<<< HEAD
-=======
-![OFF Screenshot](Docs/Image/1.HomeAssistant-OFF_Screenshot.jpg) ![ON Screenshot](Docs/Image/2.HomeAssistant-ON_Screenshot.jpg)
->>>>>>> 58999caf3f045ed5dc4a4bb0fa4870467ca3c1ac
 
 **Config of Home Assistant:** 
 - **[configuration.yaml]([automations.yaml](Code/HomeAutomation/HomeAssistant/configuration.yaml) (optional))**
