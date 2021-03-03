@@ -1,4 +1,4 @@
-﻿# Intex PureSpa modify to WIFI
+# Intex PureSpa modify to WIFI
 
 Modify the Intex PureSpa to Wifi for  **#28458, #28462 & #28442, #28440**. No hardware modification and used with Smart Home (optimized for Jeedom & Home Assistant).
 
@@ -8,13 +8,13 @@ Need Help? Join  [Whaller](https://whaller.com/sphere/aixade)
 
 Videos and pictures coming soon... 
 
-## Hardware
+## Hardware to you need
 
 -   **ESP32 Dev Kit C V4**  (Microcontroller) -  [amazon.de](https://www.amazon.de/AZDelivery-ESP32-NodeMCU-gratis-eBook/dp/B07Z83MF5W/ref=sr_1_4?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ESP32&qid=1613410149&sr=8-4)
 -   **LC12s**  (Wire modul, [Manuel about the Chip](Docs/H2-LCS12.pdf)) -  [amazon.de](https://www.amazon.de/LC12S-Wireless-serielle-transparente-Transmition/dp/B07JDN3QL7/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=lc12s&qid=1613409977&sr=8-1)  or  [aliexpress](https://de.aliexpress.com/item/4001201940321.html?spm=a2g0o.productlist.0.0.488361e7d3jNj7&algo_pvid=0319d211-c29a-4aef-ba9c-feb4d60fade2&algo_expid=0319d211-c29a-4aef-ba9c-feb4d60fade2-1&btsid=0b0a555616134100516381178e3281&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603)
 -   **Arduino Uno**  (Optional) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
 
-## Software
+## Software to you need
 
 -   [**Arduino IDE**](https://www.arduino.cc/en/software)
 -   **Install the “[ESP32 Dev Kit C V4](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)” Board for Arduino IDE**  ->  [Screenshot](Docs/Image/Board-Screenshot-IDE.PNG)
@@ -27,7 +27,7 @@ Videos and pictures coming soon...
     -   SoftwareSerial (only for Arduino)
     -   MySensors (optional)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
--   **[Download](Code/Spa/Spa.ino) the PureSpa Code**
+-   **[Download](Code/Spa/Spa.ino) the PureSpa Code and change it to your settings**
 
 ## Pinouts
 
@@ -119,12 +119,13 @@ You can debug on Arduino IDE with serial print on  **baud rate: 115200**
 Options to debug  
 _Uncomment to debug_  
 
-    //#define DEBUG_RECIEVED_DATA  
-    //#define DEBUG_SEND_COMMAND  
-    //#define DEBUG_PUMP_DATA  
-    //#define DEBUG_CONFIG  
-    //#define DEBUG_MQTT  
-    //#define DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW
+	//#define DEBUG_RECIEVED_DATA
+	//#define DEBUG_SEARCH_CHANNEL
+	//#define DEBUG_SEND_COMMAND
+	//#define DEBUG_PUMP_DATA
+	//#define DEBUG_CONFIG
+	//#define DEBUG_MQTT
+	//#define DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW
 
 ## OTA update
 
