@@ -43,7 +43,7 @@ Videos and pictures coming soon...
 ![ESP32 to LC12s](Docs/Image/Pinouts_ESP32-LC12s_v1.jpg)
 
 
-## Choose your PureSpa modell
+## Choose your PureSpa model
 
 **Uncomment one line for your Spa**
 ```
@@ -132,6 +132,17 @@ _Uncomment to debug_
 You can use OTA update (wireless) via Arduino IDE after the first upload via USB.  [Screenshot](Docs/Image/Screenshot-OTA.PNG)
 
 ## Changing ID and automatically search
+
+After the correct selection of the model (see point: Choose your PureSpa model) and after the first start, 
+a channel search is performed (slow blinking of the LC12s). After a successful search (fast blinking of the LC12) the channel is stored in the ESP (EEPROM), this can take up to 10 minutes.
+
+After the next start the memory is read out and checked if the channel is correct.
+1. If yes, then the code is continued.
+2. If no, then a new search is started until a channel is found.
+
+**Please note:** It can happen from time to time that the channel changes. You can see the channel search in debug (#define DEBUG_SEARCH_CHANNEL).
+
+For more infos, can you see it in the code comments and [manuel of the LC12s](Docs/H2-LCS12.pdf)
 
 ## Home Assistant
 Is a powerful open source home automation software. [www.home-assistant.io](https://www.home-assistant.io)
