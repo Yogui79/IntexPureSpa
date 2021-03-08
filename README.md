@@ -12,20 +12,20 @@ Videos and pictures coming soon...
 
 -   **ESP32 Dev Kit C V4**  (Microcontroller) -  [amazon.de](https://www.amazon.de/AZDelivery-ESP32-NodeMCU-gratis-eBook/dp/B07Z83MF5W/ref=sr_1_4?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ESP32&qid=1613410149&sr=8-4)
 -   **LC12s**  (Wire modul, [Manuel about the Chip](Docs/H2-LCS12.pdf)) -  [amazon.de](https://www.amazon.de/LC12S-Wireless-serielle-transparente-Transmition/dp/B07JDN3QL7/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=lc12s&qid=1613409977&sr=8-1)  or  [aliexpress](https://de.aliexpress.com/item/4001201940321.html?spm=a2g0o.productlist.0.0.488361e7d3jNj7&algo_pvid=0319d211-c29a-4aef-ba9c-feb4d60fade2&algo_expid=0319d211-c29a-4aef-ba9c-feb4d60fade2-1&btsid=0b0a555616134100516381178e3281&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603)
--   **Arduino Uno**  (Optional) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
+-   **Arduino Uno**  (for Mysensors only) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
 
 ## Software to you need
 
 -   [**Arduino IDE**](https://www.arduino.cc/en/software)
 -   **Install the “[ESP32 Dev Kit C V4](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)” Board for Arduino IDE**  ->  [Screenshot](Docs/Image/Board-Screenshot-IDE.PNG)
--   **Install the following libraries**  (search in the Arduino IDE in libraries)
-    -   EspMQTTClient.h
-    -   arduino-timer.h
+-   **Install the following libraries**  (use the Arduino Library Manager)
+    -   EspMQTTClient
+    -   arduino-timer
     -   WiFi
     -   ESPmDNS
     -   ArduinoOTA
     -   SoftwareSerial (only for Arduino)
-    -   MySensors (optional)
+    -   MySensors (only supported for Arduino)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
 -   **[Download](Code/Spa/Spa.ino) the PureSpa Code and change it to your settings**
 
@@ -134,7 +134,7 @@ You can use OTA update (wireless) via Arduino IDE after the first upload via USB
 ## Changing ID and automatically search
 
 After the correct selection of the model (see point: Choose your PureSpa model) and after the first start, 
-a channel search is performed (slow blinking of the LC12s). After a successful search (fast blinking of the LC12) the channel is stored in the ESP (EEPROM), this can take up to 10 minutes.
+a channel search is performed (slow blinking of the LC12s). After a successful search (fast blinking of the LC12s) the channel is stored in the ESP (EEPROM), this can take up to 10 minutes.
 
 After the next start the memory is read out and checked if the channel is correct.
 1. If yes, then the code is continued.
@@ -142,7 +142,7 @@ After the next start the memory is read out and checked if the channel is correc
 
 **Please note:** It can happen from time to time that the channel changes. You can see the channel search in debug (#define DEBUG_SEARCH_CHANNEL).
 
-For more infos, can you see it in the code comments and [manuel of the LC12s](Docs/H2-LCS12.pdf)
+For more infos regarding the configuration from the LC12s, can you see it in the code comments and [manuel of the LC12s](Docs/H2-LCS12.pdf)
 
 ## Home Assistant
 Is a powerful open source home automation software. [www.home-assistant.io](https://www.home-assistant.io)
