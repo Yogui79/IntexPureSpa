@@ -79,10 +79,10 @@ EspMQTTClient client(
 //#define DEBUG_SEARCH_CHANNEL
 //#define DEBUG_SEND_COMMAND
 //#define DEBUG_PUMP_DATA
+//#define DEBUG_CONTROLER_DATA
 //#define DEBUG_CONFIG
 #define DEBUG_MQTT
 //#define DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW
-
 
 #ifdef _MY_SENSORS_
 //#include <MySensors.h>
@@ -169,9 +169,9 @@ uint16_t MemValueSended[40];
 
 #define ID_FARENHEIT                15
 
-
 #define ID_SETPOINT_TEMPERATURE     20
 #define ID_ACTUAL_TEMPERATURE       21
+#define ID_TARGET_TEMPERATURE       22
 
 #define ID_ERROR_CODE               35
 #define ID_COM_PUMP                 36
@@ -198,6 +198,9 @@ uint16_t SearchChannelDataCount;
 char UsedChannel;
 char FirstCommandChar;
 uint16_t ChannelChangeOk;
+uint8_t ActualSetpointTemperarue;
+uint8_t TargetSetpointTemperarue;
+bool ChangeTargetSetpointTemperarue;
 
 //Setup
 void setup() {
@@ -269,7 +272,7 @@ void setup() {
   UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):0 ;
   FirstCommandChar = EEPROM.read(18);
   
-   Serial.print (F("Used Channel read from EEPROM 0x"));
+  Serial.print (F("Used Channel read from EEPROM 0x"));
   Serial.println(UsedChannel,HEX);
   
   // Configure LC12s if a channel is known
@@ -344,6 +347,7 @@ void loop() {
      {
        DataManagement();
        SendCommandManagement (&CommandToSend);
+       SendTemperatureSetpoint();
        state =0;
        FirstSend = true;
        FinishPumpMessage = false;  
@@ -354,6 +358,15 @@ void loop() {
    //Manage Controller message
    if (FinishControllerMessage)
    {
+#ifdef DEBUG_CONTROLER_DATA
+    char res2[5]; 
+    for (uint8_t i =0; i<SIZE_CONTROLLER_DATA;i++){
+      sprintf(&res2[0],"%02X",DataControler[i]);
+      Serial.print(res2);
+      Serial.print(" ");
+    }
+    Serial.println(" ");
+#endif    
       ControllerLoadingState = DataControler[BYTE_CONTROLER_LOADING];
       FinishControllerMessage = false;
    }
@@ -421,9 +434,9 @@ void loop() {
 
 }
 
+//Managed data recived from the LC12s
 void ReadData (unsigned char c)
-{
-  
+{ 
    switch (state) 
    {
       case 0: //wait header
@@ -446,9 +459,8 @@ void ReadData (unsigned char c)
         Data[DataCounter] =c;
         DataCounter++;
 
-        //it was a message from controler usefull in case of Controler message and pump message start with the same value
-        //resete to second byte to continue to read store pump message
-        if (c == FirstCommandChar && DataCounter< SIZE_PUMP_DATA )
+        //it was a message from controler
+        if (c == FirstCommandChar && DataCounter< SIZE_PUMP_DATA  && DataCounter > SIZE_CONTROLLER_DATA )
         {     
           memcpy (&DataControler,&Data, 8);          
           //Calclulate an check Checksum
@@ -469,7 +481,7 @@ void ReadData (unsigned char c)
           Data[DataCounter] =c;
           DataCounter++;
         }
-        // wait until full message is recived
+        // wait until full pump message is recived
         if (DataCounter> SIZE_PUMP_DATA-1)
         {
           //Calclulate an check Checksum
@@ -490,6 +502,8 @@ void ReadData (unsigned char c)
       }
    }
 }  
+
+//manage information comming from the home automation sofware over MQTT
 #ifdef _MQTT_
 void onConnectionEstablished()
 {
@@ -548,7 +562,7 @@ void onConnectionEstablished()
 
    //manage command increase
    client.subscribe("IntexSpa/Cmd increase", [](const String & payload) {
-    if (payload== "1" ){
+    if (payload== "1"){
       LastTimeSendData = millis();
       CommandToSend |= COMMAND_INCREASE;
       if (!TempWindowsOpen){
@@ -557,6 +571,13 @@ void onConnectionEstablished()
       }
     }
   });   
+
+   //manage command temperature setpoint
+   client.subscribe("IntexSpa/Cmd Temperature Setpoint", [](const String & payload) {
+    TargetSetpointTemperarue = payload.toInt();
+    ChangeTargetSetpointTemperarue = true;
+  }); 
+
 
    // reset
    client.subscribe("IntexSpa/Cmd Reset ESP", [](const String & payload) {
@@ -590,20 +611,18 @@ void onConnectionEstablished()
 }
 #endif
 
+// manage the data recived from the pump and send it to the home otmation software over MQTT
 void DataManagement (){
 #ifdef DEBUG_PUMP_DATA
     char res[5]; 
-  
     for (uint8_t i =0; i<SIZE_PUMP_DATA;i++){
       sprintf(&res[0],"%02X",Data[i]);
       Serial.print(res);
       Serial.print(" ");
-
     }
     Serial.println(" ");
 #endif
 
-  
    // Send power on
    SendValue("IntexSpa/Power on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_CONTROLLER_ON),ID_POWER_ON); 
 
@@ -621,14 +640,19 @@ void DataManagement (){
 
    //Send water sanizer on 
    SendValue("IntexSpa/Sanizer on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_SANITIZER_ON),ID_SANITIZER_ON); 
-   
 #endif   
    
    //Send Farenheit selected
    SendValue("IntexSpa/Farenheit Celsius", (bool)(Data[BYTE_STATUS_STATUS] & VALUE_FARENHEIT),ID_FARENHEIT); 
 
    //Send temperature setpoint
+   ActualSetpointTemperarue = Data[BYTE_SETPOINT_TEMPERATURE];
    SendValue("IntexSpa/Temperature Setpoint", Data[BYTE_SETPOINT_TEMPERATURE],ID_SETPOINT_TEMPERATURE); 
+   if (!ChangeTargetSetpointTemperarue)
+   {
+       TargetSetpointTemperarue =ActualSetpointTemperarue;
+       SendValue("IntexSpa/Cmd Temperature Setpoint", Data[BYTE_SETPOINT_TEMPERATURE],ID_TARGET_TEMPERATURE);   
+   }
 
    //Send actual temperature
    SendValue("IntexSpa/Actual Temperature", Data[BYTE_ACTUAL_TEMPERATURE],ID_ACTUAL_TEMPERATURE); 
@@ -653,6 +677,38 @@ void DataManagement (){
   }
 }
 
+//manage send temperature to pump
+void SendTemperatureSetpoint(){
+  
+  //nothing to do 
+  if (!ChangeTargetSetpointTemperarue)
+    return;
+    
+  // command is pendling actualy nothing else to do   
+  if (    (CommandToSend & COMMAND_INCREASE)
+      ||  (CommandToSend & COMMAND_DECREASE)
+     )
+    return;
+  // setpoint is done  
+  if (TargetSetpointTemperarue == ActualSetpointTemperarue){
+    ChangeTargetSetpointTemperarue   = false;
+    return;
+  }
+    
+  //temperature need to be increased -> send increase command
+  if (TargetSetpointTemperarue > ActualSetpointTemperarue)
+  {
+      LastTimeSendData = millis();
+      CommandToSend |= COMMAND_INCREASE;
+  }
+
+  //temperature need to be decreased -> send decrease command
+  if (TargetSetpointTemperarue < ActualSetpointTemperarue)
+  {
+      LastTimeSendData = millis();
+      CommandToSend |= COMMAND_DECREASE;
+  }
+}
 
 #ifdef _MY_SENSORS_
 void MySensorsCommandManagement(){
@@ -662,13 +718,14 @@ void MySensorsCommandManagement(){
 
 #endif
 
+//manage the command to the pump;  send until it recived
 void SendCommandManagement (uint16_t *Command){
   
   if (!Command || !*Command)
     return;
 
   if(    CommandRecived
-     ||  (millis() -LastTimeSendData> 600)
+     ||  (millis() -LastTimeSendData> 600) // timeout
     )
   {
     *Command = 0x0000;
@@ -677,7 +734,7 @@ void SendCommandManagement (uint16_t *Command){
   SendCommand(*Command);
   
 }
-
+//Send commant to recive all info in case the controller is not close to pump (E81 on controler or off)
 bool SendLifeFct(void *)
 {
 #ifdef _MQTT_ 
@@ -689,6 +746,7 @@ bool SendLifeFct(void *)
     return true;
 }
 
+//Send command to pump
 void SendCommand(uint16_t Command){
   // Sample :C7 00 00 80 00 00 4D 2B
   unsigned char SendData[10];
@@ -712,7 +770,8 @@ void SendCommand(uint16_t Command){
     sprintf(&res[0],"%02X",SendData[i]);
     Serial.print(res);
     Serial.print(" ");
-#endif    
+#endif 
+    //Wreite commans to LC12s Serial
     mySerial.write(SendData[i]);
   }
 #ifdef DEBUG_SEND_COMMAND   
@@ -747,8 +806,7 @@ bool SearchChannel(){
           ActualSearchChannel=0;
           SetSettings(ActualSearchChannel++);
         }        
-     } 
-          
+     }       
      if (mySerial.available() ) 
      {
       unsigned char c = mySerial.read();
@@ -770,12 +828,12 @@ bool SearchChannel(){
 #elif defined  (_28442_28440_)
         FirstCommandChar = UsedChannel + 0x7F;
 #endif        
+        // Write chanel to eeprom
         if (UsedChannel){
           EEPROM.write(17, UsedChannel);
           EEPROM.write(18, FirstCommandChar);
           EEPROM.commit();
         }
-        
 #ifdef DEBUG_SEARCH_CHANNEL
         sprintf(&res[0],"%02X",UsedChannel);
         Serial.println(F(""));
@@ -785,13 +843,11 @@ bool SearchChannel(){
         return true;             
       }
      }
-     
    }
    return false;
 }
 
-
-// Set settings
+// Set settings to LC12s
 void SetSettings(char Channel){
   byte Config[20];
 #ifdef DEBUG_CONFIG  
@@ -828,7 +884,7 @@ void SetSettings(char Channel){
   
   Config[11]=0x00;
   //Channel
-   Config[12]=Channel;
+  Config[12]=Channel;
   
   Config[13]=0x00;
   Config[14]=0x00;
@@ -838,9 +894,8 @@ void SetSettings(char Channel){
   //reset checksum
   Config[18] =0x0;
 
-  //calculate Checsum
+  //calculate Checksum
   for(int i=1;i<17;i++){
-
     Config[18] =Config[18] +Config[i];
   }
 #ifdef DEBUG_CONFIG
@@ -860,11 +915,7 @@ void SetSettings(char Channel){
     mySerial.write(Config[i]);
   }
  delay(1000);
- //Change baudrate
- //mySerial.end();
- //mySerial.begin(19200);
  digitalWrite(DO_SET, HIGH);
-
 }
 
 //CRC calculation 
@@ -894,10 +945,7 @@ uint16_t crc_xmodem_update (uint16_t crc, uint8_t data)
       crc <<= 1;
   }
   return crc;
-
 }
-
-
 
 //---------------------------------------------------
 //for sending values
@@ -910,11 +958,11 @@ void SendValue(const String &topic, uint8_t value ,int SENSOR_ID){
 #endif    
 #ifdef _MQTT_
     if (client.isConnected())
-      client.publish(topic, String(value)); 
-     
+      client.publish(topic, String(value));     
 #endif
-    
+        
 #ifdef DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW    
+    // Print to value consol
     Serial.print(topic);
     Serial.print(" ");
     Serial.println (value);
