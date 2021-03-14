@@ -6,7 +6,9 @@ Need Help? Join  [Whaller](https://whaller.com/sphere/aixade)
 
 ## Pictures & Videos
 
-Videos and pictures coming soon... 
+- [Video - Home Assistant - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
+ 
+More Videos and pictures coming soon... 
 
 ## Hardware to you need
 
@@ -91,8 +93,9 @@ const char* Mypassword = "YourPassword";
 | **Increase the Temp.**       | IntexSpa/Cmd increase            | Down=1  | -       | -  
 | **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |              |
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
-| **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |
-| **Setpoint Temp.**           | IntexSpa/Temperature Setpoint    | -       | -       | Yes             |
+| **Set a Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
+| **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
+| **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
 | **Send Error Message**       | IntexSpa/Error Number            | -       | -       | Yes             |
 | **Status Power on**          | IntexSpa/Power on                | -       | -       | Yes             |  
@@ -100,7 +103,7 @@ const char* Mypassword = "YourPassword";
 | **Status Heater on**         | IntexSpa/heater on               | -       | -       | Yes             |  
 | **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |  
 
-
+IntexSpa/Cmd Temperature Setpoint
 ***Only for Spa #28458 #28462***
 
 | Description | Topic String                   | Payload | Payload | Only Status          |
@@ -151,11 +154,12 @@ Is a powerful open source home automation software. [www.home-assistant.io](http
 You can use it as you want, I'll show you an example of a part of the files configuration.yaml and automations.yaml
 
 
-**Screenshot:**
+**Screenshot & Video:**
 1. [OFF - Whrilpool Screenshot](Docs/Image/1.HomeAssistant-OFF_Screenshot.jpg) 
 2. [ON - Whrilpool Screenshot](Docs/Image/2.HomeAssistant-ON_Screenshot.jpg)
 3. [Help/Infos/Reset Screenshot](Docs/Image/3.HomeAssistant-Help-Infos_Screenshot.jpg)
 4. [Push-notification Screenshot](Docs/Image/4.HomeAssistant-Push-notification_Screenshot.jpg)
+5. [Video - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
 
 
 **Config of Home Assistant:** 
