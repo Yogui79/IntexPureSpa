@@ -30,7 +30,7 @@ More Videos and pictures coming soon...
     -   SoftwareSerial (only for Arduino)
     -   MySensors (only supported for Arduino)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
--   **[Download](Code/Spa/Spa.ino) the PureSpa Code and change it to your settings**
+-   **[Download](Code/Spa/Spa.ino) the PureSpa code and change it to your settings**
 
 ## Pinouts
 
@@ -96,7 +96,7 @@ const char* Mypassword = "YourPassword";
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
 | **Command Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
 | **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
-| **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
+| **Send °C/°F Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
 | **Send Error Message**       | IntexSpa/Error Number            | -       | -       | Yes             |
 | **Status Power on**          | IntexSpa/Power on                | -       | -       | Yes             |  
