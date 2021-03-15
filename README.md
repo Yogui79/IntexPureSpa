@@ -1,6 +1,7 @@
-# Intex PureSpa modify to WIFI
+# Intex® PureSpa remote controll for Home Automation
 
-Modify the Intex PureSpa to Wifi for  **#28458, #28462 & #28442, #28440**. No hardware modification and used with Smart Home (optimized for Jeedom & Home Assistant).
+**Controll your PureSpa over MQTT or Mysensors** for  **#28458, #28462 & #28442, #28440**. 
+No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
 
 Need Help? Join  [Whaller](https://whaller.com/sphere/aixade)
 
@@ -93,7 +94,7 @@ const char* Mypassword = "YourPassword";
 | **Increase the Temp.**       | IntexSpa/Cmd increase            | Down=1  | -       | -  
 | **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |              |
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
-| **Set a Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
+| **Command Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
 | **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
 | **Send Farenheit Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
@@ -158,22 +159,23 @@ You can use it as you want, I'll show you an example of a part of the files conf
 1. [OFF - Whrilpool Screenshot](Docs/Image/1.HomeAssistant-OFF_Screenshot.jpg) 
 2. [ON - Whrilpool Screenshot](Docs/Image/2.HomeAssistant-ON_Screenshot.jpg)
 3. [Help/Infos/Reset Screenshot](Docs/Image/3.HomeAssistant-Help-Infos_Screenshot.jpg)
-4. [Push-notification Screenshot](Docs/Image/4.HomeAssistant-Push-notification_Screenshot.jpg)
-5. [Video - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
+4. [Heat Timer](Docs/Image/4.HomeAssistant-Timer_Screenshot.jpg)
+5. [Push-notification Screenshot](Docs/Image/5.HomeAssistant-Push-notification_Screenshot.jpg)
+6. [Video - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
 
 
 **Config of Home Assistant:** 
-- **[configuration.yaml]([automations.yaml](Code/HomeAutomation/HomeAssistant/configuration.yaml) (optional))**
+- [**configuration.yaml**](Code/HomeAutomation/HomeAssistant/configuration.yaml)
    - Define the switches and sensors with MQTT Topics and Payload.
 
-- **[automations.yaml](Code/HomeAutomation/HomeAssistant/automations.yaml) (optional)**
+- [**automations.yaml**](Code/HomeAutomation/HomeAssistant/automations.yaml) **(optional)**
 
   - All your automation settings such as push-notification on your mobile phone.
 
 
 ## Jeedom
 
-## The official Intex PureSpa instructions
+## The official Intex® PureSpa instructions
 
 | Articel No. | English  | German   |
 |-------------|----------|----------|
