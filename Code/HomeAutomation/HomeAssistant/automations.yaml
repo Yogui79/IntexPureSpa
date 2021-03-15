@@ -1,52 +1,62 @@
-- service: notify.mobile_app_mi_9_lite
-    data:
-      title: Whirlpool
-      message: Whirlpool is ON
-  mode: single
-- id: 'xxxxx'
-  alias: Push-Notify/Whirlpool Heater ON
+- id: '1613985120866'
+  alias: Push-Notify/Whirlpool ON
   description: ''
   trigger:
   - platform: state
-    entity_id: switch.intex_heater
+    entity_id: switch.intex_on
     from: 'off'
     to: 'on'
   condition: []
   action:
   - service: notify.mobile_app_mi_9_lite
     data:
-      title: Whirlpool heater
-      message: The heater is ON!
+      title: Whirlpool
+      message: Whirlpool is on
   mode: single
-- id: 'xxxxxxx'
-  alias: Push-Notify/Whirlpool Set. Temp >33°C
+- id: '1613985765462'
+  alias: Push-Notify/Whirlpool heat is on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.intex_heat
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: notify.mobile_app_mi_9_lite
+    data:
+      title: Whirlpool Heat
+      message: The Heat is on!
+  mode: single
+- id: '1613986681596'
+  alias: Push-Notify/Whirlpool Set. Temp >35°C
   description: ''
   trigger:
   - platform: mqtt
     topic: IntexSpa/Temperature Setpoint
-    payload: '33'
+    payload: '23'
   condition: []
   action:
   - service: notify.mobile_app_mi_9_lite
     data:
       title: Whirlpool Set. Temp
-      message: The setpoint temperature is over 33°C
+      message: The acta 35°C
   mode: single
-- id: 'xxxxxxx'
-  alias: Push-Notify/Whirlpool Actual Temperature >34°C
+- id: '1613986926992'
+  alias: Push-Notify/Whirlpool Actual Temperature Temp >22°C
   description: ''
   trigger:
   - platform: mqtt
     topic: IntexSpa/Actual Temperature
-    payload: '34'
+    payload: '22'
   condition: []
   action:
   - service: notify.mobile_app_mi_9_lite
     data:
       title: Whirlpool Actual Temperature
-      message: The actual temperature is over 34°C
+      message: Actual Temperature is over 35°C
   mode: single
-- id: 'xxxxxxxx'
+- id: '1614003380433'
   alias: Push-Notify/Whirlpool Error Message
   description: ''
   trigger:
@@ -58,5 +68,136 @@
   - service: notify.mobile_app_mi_9_lite
     data:
       title: Whirlpool Error
-      message: ATTENTION! Whirlpool Error {{ states('sensor.status') }}
+      message: Attention! Whirlpool Error {{ states('sensor.status') }}
+  mode: single
+- id: '1615142589785'
+  alias: 'Whirlpool Heatstart Timer '
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.intex_Heatstart_timer
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.intex_heat
+  mode: single
+- id: '1615145332949'
+  alias: Intex_heatingtime-timer-auto
+  description: ''
+  trigger:
+  - platform: state
+    from: 'off'
+    entity_id: input_boolean.intex_heatingtime_switch
+    attribute: editable
+    for: '"{{ states.input_number.intex_heatingtime_input }}"'
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id:
+      - switch.intex_heat
+  mode: single
+- id: '1615470995789'
+  alias: Intex_HVAC_Switch - ON
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.intex_on
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: mqtt.publish
+    data:
+      topic: IntexSpa/CMD HVAC Modeset
+      payload: '1'
+  mode: single
+- id: '1615473430455'
+  alias: Intex_HVAC_Heat - ON
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.intex_Heat
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: mqtt.publish
+    data:
+      topic: IntexSpa/CMD HVAC Modeset
+      payload: '2'
+  mode: single
+- id: '1615474815246'
+  alias: Intex_HVAC_Heat - OFF
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: switch.intex_heat
+    to: 'off'
+    from: 'on'
+  condition: []
+  action:
+  - service: mqtt.publish
+    data:
+      topic: IntexSpa/CMD HVAC Modeset
+      payload: '1'
+  mode: single
+- id: '1615475034102'
+  alias: Intex_HVAC_HeatIcon - ON
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: IntexSpa/CMD HVAC Modeset
+    payload: '5'
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id:
+      - switch.intex_heat
+  mode: single
+- id: '1615475241052'
+  alias: Intex_HVAC_HeatIcon - OFF
+  description: ''
+  trigger:
+  - platform: mqtt
+    topic: IntexSpa/CMD HVAC Modeset
+    payload: '4'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id:
+      - switch.intex_heat
+  mode: single
+- id: '1615480992382'
+  alias: Intex_Heizdauer_TriggerSwitch - on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.intex_heatingtime_switch
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.intex_heat
+  mode: single
+- id: '1615481483618'
+  alias: Intex_Heizdauer_TriggerSwitch - OFF
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.intex_heatingtime_switch
+    from: 'on'
+    to: 'off'
+  condition: []
+  action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.intex_heat
   mode: single
