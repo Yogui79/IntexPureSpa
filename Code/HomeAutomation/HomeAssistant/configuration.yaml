@@ -1,106 +1,175 @@
 ---------------------------- Only whirlpool config -------------------------
 #Switch MQTT
-switch
-  - platform mqtt
-    command_topic IntexSpaCmd Power on off
-    state_topic IntexSpaPower on
-    payload_on 1
-    payload_off 0
-    name Intex_ON
+switch:
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Power on off
+    state_topic: IntexSpa/Power on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_ON"
     
-  - platform mqtt
-    command_topic IntexSpaCmd water filter on off
-    state_topic IntexSpafilter on
-    payload_on 1
-    payload_off 0
-    name Intex_Filter
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd water filter on off
+    state_topic: IntexSpa/filter on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Filter"
     
-  - platform mqtt
-    command_topic IntexSpaCmd bubble on off
-    state_topic IntexSpaBubble on
-    payload_on 1
-    payload_off 0
-    name Intex_Bubble
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd bubble on off
+    state_topic: IntexSpa/Bubble on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Bubble"
     
-  - platform mqtt
-    command_topic IntexSpaCmd heater on off
-    state_topic IntexSpaheater on
-    payload_on 1
-    payload_off 0
-    name Intex_heater
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd heater on off
+    state_topic: IntexSpa/heater on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Heat"
     
-  - platform mqtt
-    command_topic IntexSpaCmd decrease
-    state_topic IntexSpaCmd decrease
-    payload_on 1
-    payload_off 0
-    name Intex_decrease-
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd decrease
+    state_topic: IntexSpa/Cmd decrease
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_decrease-"
     
-  - platform mqtt
-    command_topic IntexSpaCmd increase
-    state_topic IntexSpaCmd increase
-    payload_on 1
-    payload_off 0
-    name Intex_increase+
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd increase
+    state_topic: IntexSpa/Cmd increase
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Increase+"
     
-  - platform mqtt
-    command_topic IntexSpaCmd water jet on off
-    state_topic IntexSpaWater jet on
-    payload_on 1
-    payload_off 0
-    name Intex_Water Jet
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd water jet on off
+    state_topic: IntexSpa/Water jet on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Jets"
     
-  - platform mqtt
-    command_topic IntexSpaCmd sanizer on off
-    state_topic IntexSpaSanizer on
-    payload_on 1
-    payload_off 0
-    name Intex_Sanizer
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd sanizer on off
+    state_topic: IntexSpa/Sanizer on
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_Sanizer"
     
-  - platform mqtt
-    command_topic IntexSpaCmd Reset ESP
-    state_topic IntexSpaCmd Reset ESP
-    payload_on reset
-    payload_off  
-    name Reset ESP-script-switch
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Reset ESP
+    state_topic: IntexSpa/Cmd Reset ESP
+    payload_on: "reset"
+    payload_off: " "
+    name: "Reset ESP-script-switch"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Farenheit Celsius
+    payload_on: "1"
+    payload_off: "0"
+    name: "Change Farenheit/Celsius"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/CMD HVAC Modeset
+    payload_on: "1"
+    payload_off: "0"
+    name: "Intex_HVAC_Tamplate_Switch"
+    
+    
+
+#Climate
+climate:
+  - platform: mqtt
+    name: "Intex_Actual_Temperature"
+    modes: 
+      - "heat"
+      - "auto"
+    current_temperature_topic: "IntexSpa/Actual Temperature"
+    temperature_command_topic: "IntexSpa/Cmd Temperature Setpoint"
+    temperature_state_topic: "IntexSpa/Temperature Setpoint"
+    
+    payload_on: "1"
+    payload_off: "0"
+    payload_available: "1"
+    payload_not_available: "0"
+    
+    mode_command_topic: "IntexSpa/CMD HVAC Modeset"
+    mode_state_topic: "IntexSpa/CMD HVAC Modeset"
+    mode_state_template: >-
+     {% set values = { '1':'auto', '2':'heat',  '3':'cool', '0':'off'} %}
+        {{ values[value] if value in values.keys() else 'off' }}
+    mode_command_template: >-
+      {% set values = { 'auto':'4', 'heat':'5',  'cool':'3', 'off':'0'} %}
+      {{ values[value] if value in values.keys() else '4' }}
+  
+    max_temp: "40"
+    min_temp: "10"
 
 #Sensor
-sensor
-  - platform mqtt
-    name Status
-    state_topic IntexSpaError Number
-    unit_of_measurement 'E'
-  - platform mqtt
-    name Aktuelle Temp.
-    state_topic IntexSpaActual Temperature
-    unit_of_measurement '°c'
-  - platform mqtt
-    name Set Temp.
-    state_topic IntexSpaTemperature Setpoint
-    unit_of_measurement '°c'
-  - platform mqtt
-    name IntexSpa_Communication with pump
-    state_topic IntexSpaCommunication with pump
+sensor:
+  - platform: mqtt
+    name: "Status"
+    state_topic: "IntexSpa/Error Number"
+    unit_of_measurement: 'E'
+  - platform: mqtt
+    name: "Actual Temperature"
+    state_topic: "IntexSpa/Actual Temperature"
+    unit_of_measurement: '°c'
+  - platform: mqtt
+    name: "Set Temp."
+    state_topic: "IntexSpa/Temperature Setpoint"
+    unit_of_measurement: '°c'
+  - platform: mqtt
+    name: "IntexSpa_Communication-with-pump"
+    state_topic: "IntexSpa/Communication with pump"
+  - platform: mqtt
+    name: "Timer"
+    state_topic: "payload"
+    
+    
     
 #Template Sensor   
-  - platform template
-    sensors
-      intexstatustemplate
-        friendly_name Intex Status Template
-        value_template -
+  - platform: template
+    sensors:
+      intexstatustemplate:
+        friendly_name: "Intex Status Template"
+        value_template: >-
           {% if is_state('sensor.status','0') %}
             OK
           {% else %}
             E 
             {{ states('sensor.status') }}
           {% endif %}
-  - platform template
-    sensors
-      intexkommunikationmitpumpetemplate
-        friendly_name Communication with pump - Template
-        value_template -
-          {% if is_state('sensor.intexspa_communication_with_pump','1') %}
+  - platform: template
+    sensors:
+      intexkommunikationmitpumpetemplate:
+        friendly_name: "Intex Communication with pump - Template"
+        value_template: >-
+          {% if is_state('sensor.intexSpa_communication-with-pump','1') %}
             OK
           {% else %}
             Keine Verbindung
+          {% endif %}
+  - platform: template
+    sensors:
+      intextimerheizdauer:
+        friendly_name: "Timer"
+        value_template: >-
+          {% if is_state('sensor.timer','-1') %}
+            Aus
+          {% else %}
+             {{ states('sensor.timer') }} 
+          {% endif %}
+  - platform: template
+    sensors:
+      settemptest:
+        friendly_name: "SetTempTest"
+        value_template: >-
+          {% if is_state('IntexSpa/Temperature Setpoint',' ') %}
+            Aus1
+          {% else %}
+             {{ states('IntexSpa/Temperature Setpoint') }} 
+          {% endif %}
+          
 -------------------------
