@@ -96,7 +96,7 @@ const char* Mypassword = "YourPassword";
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
 | **Command Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
 | **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
-| **Send °C/°F Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
+| **Send °F Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
 | **Send Error Message**       | IntexSpa/Error Number            | -       | -       | Yes             |
 | **Status Power on**          | IntexSpa/Power on                | -       | -       | Yes             |  
@@ -104,7 +104,7 @@ const char* Mypassword = "YourPassword";
 | **Status Heater on**         | IntexSpa/heater on               | -       | -       | Yes             |  
 | **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |  
 
-IntexSpa/Cmd Temperature Setpoint
+
 ***Only for Spa #28458 #28462***
 
 | Description | Topic String                   | Payload | Payload | Only Status          |
