@@ -1,13 +1,13 @@
-# Intex® PureSpa remote controll for Home Automation
+# Intex® PureSpa remote control for Home Automation
 
-**Controll your PureSpa over MQTT or Mysensors** for  **#28458, #28462 & #28442, #28440**. 
+**Control your PureSpa over MQTT or Mysensors** for  **#28458, #28462 & #28442, #28440**. 
 No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
 
 Need Help? Join  [Whaller](https://whaller.com/sphere/aixade)
 
 ## Pictures & Videos
 
-- [Video - Home Assistant - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
+- [Video - Home Assistant - Screen Recording ](https://youtu.be/5Z1keongL40)
  
 More Videos and pictures coming soon... 
 
@@ -161,7 +161,7 @@ You can use it as you want, I'll show you an example of a part of the files conf
 3. [Help/Infos/Reset Screenshot](Docs/Image/3.HomeAssistant-Help-Infos_Screenshot.jpg)
 4. [Heat Timer](Docs/Image/4.HomeAssistant-Timer_Screenshot.jpg)
 5. [Push-notification Screenshot](Docs/Image/5.HomeAssistant-Push-notification_Screenshot.jpg)
-6. [Video - Screen Recording ](https://youtu.be/M_iNxbb4UTU)
+6. [Video - Screen Recording ](https://youtu.be/5Z1keongL40)
 
 
 **Config of Home Assistant:** 
