@@ -639,7 +639,7 @@ void DataManagement (){
    }else if ((Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_ON) ){
      HeaterState = 2;       // state heater on
    }
-   SendValue("IntexSpa/heater on", HeaterState ,ID_HEATER_STATE); 
+   SendValue("IntexSpa/heater state", HeaterState ,ID_HEATER_STATE); 
 
    //Send water filter on 
    SendValue("IntexSpa/filter on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_WATER_FILTER_ON),ID_WATER_FILTER_ON); 
