@@ -1,7 +1,7 @@
 # Intex® PureSpa remote control for Home Automation
 
-**Control your PureSpa over MQTT or Mysensors** for  **#28458, #28462 & #28442, #28440**. 
-No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
+**Control your PureSpa over MQTT or Mysensors *(comming soon)*** for  **#28458, #28462 & #28442, #28440**. 
+No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com -coming soon-) & [Home Assistant](https://www.home-assistant.io)).
 
 ## Pictures & Videos
 
@@ -172,7 +172,7 @@ You can use it as you want, I'll show you an example of a part of the files conf
   - All your automation settings such as push-notification on your mobile phone.
 
 
-## Jeedom
+## Jeedom (comming soon)
 
 ## The official Intex® PureSpa instructions
 
