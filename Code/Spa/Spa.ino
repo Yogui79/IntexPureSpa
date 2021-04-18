@@ -14,10 +14,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *   Pin conection
+ *   Pin connection
  *                      
  *                       LC12S     Arduino     ESP
- * ___________________
+ *  ___________________
  * |                  o| GNG       GND         GND
  * |                  o| CS        D5          D18
  * |                  o| SET       D6          D19
@@ -134,8 +134,7 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #define VALUE_CONTROLLER_ON           0x01
 #define VALUE_BUBBLE_ON               0x10
 
-#define VALUE_HEATER_STANDBY          0x02  //to check
-
+#define VALUE_HEATER_STANDBY          0x02
 #define VALUE_HEATER_ON               0x04  
 #define VALUE_WATER_FILTER_ON         0x08  
 
@@ -163,9 +162,10 @@ uint16_t MemValueSended[40];
 #define ID_POWER_ON                 1
 #define ID_BUBBLE_ON                2
 #define ID_HEATER_ON                3
-#define ID_WATER_FILTER_ON          4
-#define ID_VALUE_WATER_JET_ON       5
-#define ID_SANITIZER_ON             6
+#define ID_HEATER_STATE             4
+#define ID_WATER_FILTER_ON          5
+#define ID_VALUE_WATER_JET_ON       6
+#define ID_SANITIZER_ON             7
 
 #define ID_FARENHEIT                15
 
@@ -611,7 +611,7 @@ void onConnectionEstablished()
 }
 #endif
 
-// manage the data recived from the pump and send it to the home otmation software over MQTT
+// manage the data recived from the pump and send it to the home autmation software over MQTT
 void DataManagement (){
 #ifdef DEBUG_PUMP_DATA
     char res[5]; 
@@ -630,7 +630,16 @@ void DataManagement (){
    SendValue("IntexSpa/Bubble on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_BUBBLE_ON),ID_BUBBLE_ON); 
 
    //Send heater on 
-   SendValue("IntexSpa/heater on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_ON),ID_HEATER_ON); 
+   SendValue("IntexSpa/heater on", (bool)((Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_ON) || (Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_STANDBY)),ID_HEATER_ON); 
+
+   //Send heater State
+   uint16_t HeaterState= 0;
+   if (Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_STANDBY){
+      HeaterState = 1;      // state standby
+   }else if ((Data[BYTE_STATUS_COMMAND] & VALUE_HEATER_ON) ){
+     HeaterState = 2;       // state heater on
+   }
+   SendValue("IntexSpa/heater on", HeaterState ,ID_HEATER_STATE); 
 
    //Send water filter on 
    SendValue("IntexSpa/filter on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_WATER_FILTER_ON),ID_WATER_FILTER_ON); 
