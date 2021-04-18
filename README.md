@@ -95,6 +95,7 @@ const char* Mypassword = "YourPassword";
 | **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |              |
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
 | **Command Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
+| **Heater Status**                   | IntexSpa/heater state       | standby=1 & ON=2  | OFF=0    | Yes
 | **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
 | **Send °F Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
 | **Send Actual Temp.**        | IntexSpa/Actual Temperature      | -       | -       | Yes             |
