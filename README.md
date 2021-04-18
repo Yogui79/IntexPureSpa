@@ -3,8 +3,6 @@
 **Control your PureSpa over MQTT or Mysensors** for  **#28458, #28462 & #28442, #28440**. 
 No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
 
-Need Help? Join  [Whaller](https://whaller.com/sphere/aixade)
-
 ## Pictures & Videos
 
 - [Video - Home Assistant - Screen Recording ](https://youtu.be/5Z1keongL40)
