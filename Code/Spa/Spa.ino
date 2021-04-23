@@ -76,9 +76,9 @@ EspMQTTClient client(
 
 //Uncomment following line to have more debug infos
 //#define DEBUG_RECIEVED_DATA
-//#define DEBUG_SEARCH_CHANNEL
+#define DEBUG_SEARCH_CHANNEL
 //#define DEBUG_SEND_COMMAND
-//#define DEBUG_PUMP_DATA
+#define DEBUG_PUMP_DATA
 //#define DEBUG_CONTROLER_DATA
 //#define DEBUG_CONFIG
 #define DEBUG_MQTT
@@ -193,10 +193,10 @@ long LastTimeReciveData;
 bool ErrorCommunicationWithPump;
 long LastTimeSendData;
 long LastTimeReciveDataCheckChannel;
-char ActualSearchChannel;
+uint8_t ActualSearchChannel;
 uint16_t SearchChannelDataCount; 
-char UsedChannel;
-char FirstCommandChar;
+uint8_t UsedChannel;
+uint8_t FirstCommandChar;
 uint16_t ChannelChangeOk;
 uint8_t ActualSetpointTemperarue;
 uint8_t TargetSetpointTemperarue;
@@ -270,11 +270,12 @@ void setup() {
   }
 #endif  
   UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):0 ;
-  FirstCommandChar = EEPROM.read(18);
+  FirstCommandChar = EEPROM.read(18)< 256? EEPROM.read(18):0;
   
   Serial.print (F("Used Channel read from EEPROM 0x"));
   Serial.println(UsedChannel,HEX);
-  
+  Serial.print (F("Used first command read from EEPROM 0x"));
+  Serial.println(FirstCommandChar,HEX);
   // Configure LC12s if a channel is known
   if (UsedChannel){
     SetSettings(UsedChannel);
@@ -403,16 +404,22 @@ void loop() {
         ActualSearchChannel =UsedChannel+1;
      }
 #elif defined  (_28442_28440_)
-     if (ChannelChangeOk == 1){ 
+     if (ChannelChangeOk == 1){
+      FirstCommandChar = FirstCommandChar -6;
+     }
+     if (ChannelChangeOk >0 && ChannelChangeOk < 15){ 
         LastTimeReciveData = millis();
         ChannelChangeOk++;
         FirstCommandChar ++;
         EEPROM.write(18, FirstCommandChar);
+#ifdef ESP32        
         EEPROM.commit();
-        Serial.println (F("Try next first Command char"));
+#endif        
+        Serial.print (F("Try next first Command char 0x"));
+        Serial.println (FirstCommandChar,HEX);
         return;
      }
-     else if (ChannelChangeOk > 1)
+     else if (ChannelChangeOk > 14)
         ActualSearchChannel =UsedChannel+1;
 #endif
      else{
