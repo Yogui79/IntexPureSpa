@@ -11,8 +11,8 @@ More Videos and pictures coming soon...
 
 ## Hardware to you need
 
--   **ESP32 Dev Kit C V4**  (Microcontroller) -  [amazon.de](https://www.amazon.de/AZDelivery-ESP32-NodeMCU-gratis-eBook/dp/B07Z83MF5W/ref=sr_1_4?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ESP32&qid=1613410149&sr=8-4)
--   **LC12s**  (Wire modul, [Manuel about the Chip](Docs/H2-LCS12.pdf)) -  [amazon.de](https://www.amazon.de/LC12S-Wireless-serielle-transparente-Transmition/dp/B07JDN3QL7/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=lc12s&qid=1613409977&sr=8-1)  or  [aliexpress](https://de.aliexpress.com/item/4001201940321.html?spm=a2g0o.productlist.0.0.488361e7d3jNj7&algo_pvid=0319d211-c29a-4aef-ba9c-feb4d60fade2&algo_expid=0319d211-c29a-4aef-ba9c-feb4d60fade2-1&btsid=0b0a555616134100516381178e3281&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603)
+-   **ESP32 Dev Kit C V4**  (Microcontroller) -  [amazon.de](https://www.amazon.de/AZDelivery-ESP32-NodeMCU-gratis-eBook/dp/B07Z83MF5W/ref=sr_1_4?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ESP32&qid=1613410149&sr=8-4) or [amazon.fr](https://www.amazon.fr/dp/B071P98VTG/ref=cm_sw_em_r_mt_dp_75FGTM5YA2BCF0CFERF4?_encoding=UTF8&psc=1)
+-   **LC12s**  (Wire modul, [Manuel about the Chip](Docs/H2-LCS12.pdf)) -  [amazon.de](https://www.amazon.de/LC12S-Wireless-serielle-transparente-Transmition/dp/B07JDN3QL7/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=lc12s&qid=1613409977&sr=8-1)  or  [aliexpress](https://de.aliexpress.com/item/4001201940321.html?spm=a2g0o.productlist.0.0.488361e7d3jNj7&algo_pvid=0319d211-c29a-4aef-ba9c-feb4d60fade2&algo_expid=0319d211-c29a-4aef-ba9c-feb4d60fade2-1&btsid=0b0a555616134100516381178e3281&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603) 
 -   **Arduino Uno**  (for Mysensors only) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
 
 ## Software to you need
@@ -28,7 +28,6 @@ More Videos and pictures coming soon...
     -   SoftwareSerial (only for Arduino)
     -   MySensors (only supported for Arduino)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
--   **[Download](src/Spa/Spa.ino) the PureSpa code and change it to your settings**
 
 ## Pinouts
 
@@ -43,6 +42,45 @@ More Videos and pictures coming soon...
 
 ![ESP32 to LC12s](Docs/Image/Pinouts_ESP32-LC12s_v1.jpg)
 
+## Channel and Network id detection
+
+The channel and the network id are unique for each spa, specialy the network id. Unfortunately, I am not yet able to read these parameters from the pump controller.
+But I write some help software for that.
+
+-  **Channel detection**  
+**This detection can take up to 3 minutes.**
+    -   [Download](src/Tools/SearchChannel) the channel detection code
+    -   Upload the code to your ESP32 or Arduino
+    -   Open the Arduino Ide Serial Monitor (speed 115200 baud), the actual channel configuration is diplayed (in hexadecimal)
+    -   Look at the LC12s LED, when the right channel is detected it will flash faster see the [video](Docs/Video/ChannelSearchBlink.mp4) 
+    -   Note the actual channel configuration, you will need it for the Network id detection
+
+-  **Network id detection.**  
+**This detection can take up to 36 hours.**  
+    -   [Download](src/Tools/SearchNetworkId/) the network id detection code
+    -   Write then channel (in Hexadecimal) you note befor here  
+	```
+	uint8_t Channel =0x37; 
+	```  
+    -   Upload the code to your ESP32 or Arduino
+    -   Look at the LC12s LED, when you use the right channel it will flash fast see the [video](Docs/Video/RightChannel.mp4). If the LED doesn't flash try some channel befor and/or after until the LED flash. If the LED doen't flash her you will not be able to fin a network id.
+    -   Download [PuTTY](https://www.putty.org/) and configure it to [log serial port inside a file](https://www.eye4software.com/hydromagic/documentation/articles-and-howtos/serial-port-logging/) under Linux you can also use [grabserial](https://elinux.org/Grabserial). Of course you can use other tool wo are able to save serial comunication inside a file. With the Arduino Serial Monitor I make bad experiance when he is open 36 hours.
+    -   Uncomment following line
+	```
+        //#define SEARCH_NETWORK_ID	
+	```  
+    -   Upload the code to your ESP32 or Arduino
+    -   Wait untill the right network id is founded **this can take up to 36 hours.** It will be displayed on your Serial Monitor software and save into the file.
+
+## PureSpa Sofware
+Now you can [Download](src/Spa/) the PureSpa code change it to your settings and upload it to your ESP or Arduino
+
+##  Channel and Network id configuration
+**Put the Channel and Network id you found previously here (in hexadecimal)**
+```
+#define USED_NETWORK_ID    0xFFFF
+#define USED_CHANNEL       0x48
+```
 
 ## Choose your PureSpa model
 

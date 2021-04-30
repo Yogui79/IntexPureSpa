@@ -29,6 +29,17 @@
 
 /*******************************************************
 *
+*   E N T E R   Y O U R   N E T W O R K   I D  
+*   
+*     A N D  T H E  C H A N N E L   (HEX)
+*  
+********************************************************/
+
+#define USED_NETWORK_ID    0xFFFF
+#define USED_CHANNEL       0x48
+
+/*******************************************************
+*
 *   S E L E C T    Y O U R   S P A   M O D E L 
 *  
 ********************************************************/
@@ -269,8 +280,14 @@ void setup() {
     Serial.println("failed to initialise EEPROM"); delay(1000000);
   }
 #endif  
-  UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):0 ;
-  FirstCommandChar = EEPROM.read(18)< 256? EEPROM.read(18):0;
+  uint8_t DefaultChannel = (USED_CHANNEL & 0x00FF);
+#if defined (_28458_28462_)  
+   uint8_t DefaultFirstCommandChar = USED_CHANNEL ;
+#elif defined (_28442_28440_)  
+  uint8_t DefaultFirstCommandChar = (USED_CHANNEL & 0x00FF) + 0x7F;
+#endif  
+  UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):DefaultChannel ;
+  FirstCommandChar = EEPROM.read(18)< 256? EEPROM.read(18):DefaultFirstCommandChar;
   
   Serial.print (F("Used Channel read from EEPROM 0x"));
   Serial.println(UsedChannel,HEX);
@@ -866,6 +883,7 @@ bool SearchChannel(){
 // Set settings to LC12s
 void SetSettings(char Channel){
   byte Config[20];
+  uint16_t UsedNetworkId = USED_NETWORK_ID;
 #ifdef DEBUG_CONFIG  
   char res[5];
 #endif  
@@ -877,16 +895,9 @@ void SetSettings(char Channel){
   Config[3]=0xB9; 
   Config[4]=0x46;
 
-//Network ID
-#ifdef _28442_28440_  
-  Config[5]=0xFF;
-  Config[6]=0XFF;
-#endif
-
-#ifdef _28458_28462_  
-  Config[5]=0x03;
-  Config[6]=0XA6;
-#endif
+  //Network ID
+  Config[5]=UsedNetworkId & 0xFF00 >>8;
+  Config[6]=UsedNetworkId & 0X00FF;
    
   Config[7]=0x00;
   
