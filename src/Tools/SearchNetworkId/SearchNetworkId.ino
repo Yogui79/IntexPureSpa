@@ -26,7 +26,7 @@
 
 uint8_t Channel =0x47; 
 //#define SEARCH_NETWORK_ID
-uint16_t idtosend =0xFFFC;
+uint16_t idtosend =0x0000;
 
 
 
