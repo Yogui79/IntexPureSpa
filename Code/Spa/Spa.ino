@@ -24,7 +24,7 @@
  * |                  o| TX        D2          D16
  * |                  o| RX        D4          D17
  * |__________________o| VCC       3.3V        3.3V
-
+ * 
 */
 
 /*******************************************************
@@ -77,7 +77,7 @@ EspMQTTClient client(
 //Uncomment following line to have more debug infos
 //#define DEBUG_RECIEVED_DATA
 #define DEBUG_SEARCH_CHANNEL
-//#define DEBUG_SEND_COMMAND
+#define DEBUG_SEND_COMMAND
 #define DEBUG_PUMP_DATA
 //#define DEBUG_CONTROLER_DATA
 //#define DEBUG_CONFIG
@@ -383,7 +383,7 @@ void loop() {
      }
 #endif
   // check communication pump timeout
-  if (millis() - LastTimeReciveData > 2000 ){
+  if (millis() - LastTimeReciveData > 4000 ){
     SendValue("IntexSpa/Communication with pump", false,ID_COM_PUMP); 
     ErrorCommunicationWithPump = true;
   }
@@ -554,16 +554,15 @@ void onConnectionEstablished()
     }      
   }); 
 
+    
    //manage command decrease
    client.subscribe("IntexSpa/Cmd decrease", [](const String & payload) {
     if (payload== "1")
    {
       LastTimeSendData = millis();
-      CommandToSend |= COMMAND_DECREASE;
-      if (!TempWindowsOpen){
-        delay (200);
-        CommandToSend |= COMMAND_DECREASE;
-      }
+      TargetSetpointTemperarue = TargetSetpointTemperarue -1;
+      ChangeTargetSetpointTemperarue = true;
+      
     }
   }); 
 
@@ -571,11 +570,8 @@ void onConnectionEstablished()
    client.subscribe("IntexSpa/Cmd increase", [](const String & payload) {
     if (payload== "1"){
       LastTimeSendData = millis();
-      CommandToSend |= COMMAND_INCREASE;
-      if (!TempWindowsOpen){
-      delay (200);
-      CommandToSend |= COMMAND_INCREASE;
-      }
+      TargetSetpointTemperarue = TargetSetpointTemperarue +1;
+      ChangeTargetSetpointTemperarue = true;
     }
   });   
 
@@ -705,8 +701,12 @@ void SendTemperatureSetpoint(){
       ||  (CommandToSend & COMMAND_DECREASE)
      )
     return;
+    
   // setpoint is done  
-  if (TargetSetpointTemperarue == ActualSetpointTemperarue){
+  if (    TargetSetpointTemperarue == ActualSetpointTemperarue
+      ||  TargetSetpointTemperarue > 40
+      ||  TargetSetpointTemperarue < 14
+     ){
     ChangeTargetSetpointTemperarue   = false;
     return;
   }
@@ -884,8 +884,8 @@ void SetSettings(char Channel){
 #endif
 
 #ifdef _28458_28462_  
-  Config[5]=0x0D;
-  Config[6]=0X05;
+  Config[5]=0x03;
+  Config[6]=0XA6;
 #endif
    
   Config[7]=0x00;
