@@ -25,7 +25,7 @@
 
 
 uint8_t Channel =0x47; 
-#define SEARCH_NETWORK_ID
+//#define SEARCH_NETWORK_ID
 uint16_t idtosend =0xFFFC;
 
 
@@ -65,7 +65,7 @@ void setup() {
 #ifdef SEARCH_NETWORK_ID
   Serial.println (F("          Search Network id active"));
 #else
-  Serial.println (F("          Verify Channel"));
+  Serial.println (F("          Check Channel"));
   Serial.println (F(""));
   Serial.println (F("          LED on LC12s should blink fast"));  
 #endif
