@@ -28,7 +28,7 @@ More Videos and pictures coming soon...
     -   SoftwareSerial (only for Arduino)
     -   MySensors (only supported for Arduino)
 -   **You need a MQTT broker**  (e.g. Mosquitto Broker)
--   **[Download](Code/Spa/Spa.ino) the PureSpa code and change it to your settings**
+-   **[Download](src/Spa/Spa.ino) the PureSpa code and change it to your settings**
 
 ## Pinouts
 
@@ -164,10 +164,10 @@ You can use it as you want, I'll show you an example of a part of the files conf
 
 
 **Config of Home Assistant:** 
-- [**configuration.yaml**](Code/HomeAutomation/HomeAssistant/configuration.yaml)
+- [**configuration.yaml**](src/HomeAutomation/HomeAssistant/configuration.yaml)
    - Define the switches and sensors with MQTT Topics and Payload.
 
-- [**automations.yaml**](Code/HomeAutomation/HomeAssistant/automations.yaml) **(optional)**
+- [**automations.yaml**](src/HomeAutomation/HomeAssistant/automations.yaml) **(optional)**
 
   - All your automation settings such as push-notification on your mobile phone.
 
