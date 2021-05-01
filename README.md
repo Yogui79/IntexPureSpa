@@ -1,6 +1,6 @@
 # Intex® PureSpa remote control for Home Automation
 
-**Control your PureSpa over MQTT or Mysensors *(comming soon)*** for  **#28458, #28462 & #28442, #28440**. 
+**Control your PureSpa over MQTT or MySensors *(comming soon)*** for  **#28458, #28462 & #28442, #28440**. 
 No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
 
 ## Pictures & Videos
@@ -13,7 +13,7 @@ More Videos and pictures coming soon...
 
 -   **ESP32 Dev Kit C V4**  (Microcontroller) -  [amazon.de](https://www.amazon.de/AZDelivery-ESP32-NodeMCU-gratis-eBook/dp/B07Z83MF5W/ref=sr_1_4?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ESP32&qid=1613410149&sr=8-4) or [amazon.fr](https://www.amazon.fr/dp/B071P98VTG/ref=cm_sw_em_r_mt_dp_75FGTM5YA2BCF0CFERF4?_encoding=UTF8&psc=1)
 -   **LC12s**  (Wire modul, [Manuel about the Chip](Docs/H2-LCS12.pdf)) -  [amazon.de](https://www.amazon.de/LC12S-Wireless-serielle-transparente-Transmition/dp/B07JDN3QL7/ref=sr_1_1?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=lc12s&qid=1613409977&sr=8-1)  or  [aliexpress](https://de.aliexpress.com/item/4001201940321.html?spm=a2g0o.productlist.0.0.488361e7d3jNj7&algo_pvid=0319d211-c29a-4aef-ba9c-feb4d60fade2&algo_expid=0319d211-c29a-4aef-ba9c-feb4d60fade2-1&btsid=0b0a555616134100516381178e3281&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603) 
--   **Arduino Uno**  (for Mysensors only) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
+-   **Arduino Uno**  (for MySensors only) -  [amazon.de](https://www.amazon.de/Arduino-Uno-Rev-3-Mikrocontroller-Board/dp/B008GRTSV6/ref=sr_1_3?__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Arduino%20Uno&qid=1613414774&quartzVehicle=35-163&replacementKeywords=arduino&sr=8-3)
 
 ## Software to you need
 
@@ -60,10 +60,10 @@ But I write some help software for that.
     -   [Download](src/Tools/SearchNetworkId/) the network id detection code
     -   Write then channel (in Hexadecimal) you note befor here  
 	```
-	uint8_t Channel =0x37; 
+	uint8_t Channel =yourchanel; //(for example 0x37) 
 	```  
     -   Upload the code to your ESP32 or Arduino
-    -   Look at the LC12s LED, when you use the right channel it will flash fast see the [video](Docs/Video/RightChannel.mp4). If the LED doesn't flash try some channel befor and/or after until the LED flash. If the LED doen't flash her you will not be able to fin a network id.
+    -   Look at the LC12s LED, when you use the right channel it will flash fast see the [video](Docs/Video/RightChannel.mp4). If the LED doesn't flash try some channel befor and/or after until the LED flash. If the LED doen't flash her you will not be able to find a network id.
     -   Download [PuTTY](https://www.putty.org/) and configure it to [log serial port inside a file](https://www.eye4software.com/hydromagic/documentation/articles-and-howtos/serial-port-logging/) under Linux you can also use [grabserial](https://elinux.org/Grabserial). Of course you can use other tool wo are able to save serial comunication inside a file. With the Arduino Serial Monitor I make bad experiance when he is open 36 hours.
     -   Uncomment following line
 	```
