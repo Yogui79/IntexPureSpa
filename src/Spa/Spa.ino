@@ -635,6 +635,7 @@ void onConnectionEstablished()
 void DataManagement (){
 #ifdef DEBUG_PUMP_DATA
     char res[5]; 
+    Serial.print("Debug Pump data : ");    
     for (uint8_t i =0; i<SIZE_PUMP_DATA;i++){
       sprintf(&res[0],"%02X",Data[i]);
       Serial.print(res);
@@ -788,7 +789,7 @@ void SendCommand(uint16_t Command){
 #endif  
   SendData[0] = FirstCommandChar;
   SendData[1] = (Command & 0xFF00) >> 8;;
-  SendData[2] = Command  & 0x00FFF;
+  SendData[2] = Command  & 0x00FF;
   SendData[3] = ControllerLoadingState;  
   SendData[4] = 0x00;
   SendData[5] = 0x00;
@@ -797,7 +798,9 @@ void SendCommand(uint16_t Command){
   uint16_t crc_out = calc_crc((char*) SendData,6);
   SendData[6] = (crc_out & 0xFF00) >> 8;
   SendData[7] = crc_out & 0x00FFF;
- 
+#ifdef DEBUG_SEND_COMMAND 
+  Serial.print("Debug Send command : ");
+#endif 
   for (uint8_t i =0; i<SIZE_CONTROLLER_DATA;i++){
 #ifdef DEBUG_SEND_COMMAND 
     sprintf(&res[0],"%02X",SendData[i]);
@@ -847,8 +850,10 @@ bool SearchChannel(){
       SearchChannelDataCount++;
 #ifdef DEBUG_SEARCH_CHANNEL
       sprintf(&res[0],"%02X",c); 
-      if (c==0xAA)
+      if (c==0xAA){
         Serial.println(F(""));
+        Serial.print(F("Debug search Chanel : "));
+      }
       Serial.print(res);
       Serial.print(F(" "));
 #endif
@@ -896,7 +901,7 @@ void SetSettings(char Channel){
   Config[4]=0x46;
 
   //Network ID
-  Config[5]=UsedNetworkId & 0xFF00 >>8;
+  Config[5]=(UsedNetworkId & 0xFF00) >> 8;
   Config[6]=UsedNetworkId & 0X00FF;
    
   Config[7]=0x00;
