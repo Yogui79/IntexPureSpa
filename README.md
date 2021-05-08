@@ -219,4 +219,12 @@ You can use it as you want, I'll show you an example of a part of the files conf
 | 28462 & 28458      | [Download](Docs/28462-28458_344IO_202_EN_.pdf) | [Download](Docs/28462_28458_344IO_2020_DE.pdf) |
 | 28442 & 28440       | [Download](Docs/28442-28440_346IO_2020_EN.pdf) | [Download](Docs/28442_28440_346IO_2020_DE.pdf) |
 
-thanks [@LEECHER1](https://github.com/LEECHER1) for this documentation and all test he do
+
+## Known issues
+-  **Water Filter control doesn't work as espected** 
+-  **Sanizer control doesn't work as espected** 
+-  **MySensors isn't implemented** 
+
+
+**Thanks [@LEECHER1](https://github.com/LEECHER1) for this documentation and all test he do**
+
