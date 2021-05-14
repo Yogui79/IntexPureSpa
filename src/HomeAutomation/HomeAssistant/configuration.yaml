@@ -51,11 +51,11 @@ switch:
     name: "Intex_Jets"
     
   - platform: mqtt
-    command_topic: IntexSpa/Cmd sanizer on off
-    state_topic: IntexSpa/Sanizer on
+    command_topic: IntexSpa/Cmd sanitizer on off
+    state_topic: IntexSpa/Sanitizer on
     payload_on: "1"
     payload_off: "0"
-    name: "Intex_Sanizer"
+    name: "Intex_Sanitizer"
     
   - platform: mqtt
     command_topic: IntexSpa/Cmd Reset ESP
@@ -76,6 +76,15 @@ switch:
     payload_off: "0"
     name: "Intex_HVAC_Tamplate_Switch"
     
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd water filter time
+    state_topic: IntexSpa/filter setup time
+    name: "Intex_Filter_Timer"
+    
+  - platform: mqtt
+    command_topic: IntexSpa/Cmd Sanitizer time
+    state_topic: IntexSpa/Sanitizer setup time
+    name: "Intex_Sanitizer_Timer"    
     
 
 #Climate
@@ -126,7 +135,15 @@ sensor:
   - platform: mqtt
     name: "Timer"
     state_topic: "payload"
-    
+  - platform: mqtt
+    name: "Intex/Heater Status"
+    state_topic: "IntexSpa/heater state"
+  - platform: mqtt
+    name: "IntexSpa/Filter Setup Timer"
+    state_topic: "IntexSpa/filter setup time"
+  - platform: mqtt
+    name: "IntexSpa/Desinfektion setup Timer"
+    state_topic: "IntexSpa/Sanitizer setup time"    
     
     
 #Template Sensor   
