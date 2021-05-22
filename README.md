@@ -123,14 +123,15 @@ const char* Mypassword = "YourPassword";
 |------------------------------|----------------------------------|---------|---------|-----------------|
 | **Power**                    | IntexSpa/Cmd Power on off        | ON=1    | OFF=0   | -               |
 | **Water Filter**             | IntexSpa/Cmd water filter on off | ON=1    | OFF=0   | -               |
+| **Water Filter Timer**        | IntexSpa/Cmd water filter time   | hours=2,4,6       | -   | -               |
 | **Bubble**                   | IntexSpa/Cmd bubble on off       | ON=1    | OFF=0   | -               |
 | **Heater**                   | IntexSpa/Cmd heater on off       | ON=1    | OFF=0   | -               |
 | **Change Farenheit/Celsius** | IntexSpa/Cmd Farenheit Celsius   | F=1     | C=0     | -               |
 | **Decrease the Temp.**       | IntexSpa/Cmd decrease            | UP=1    | -       | -               |
 | **Increase the Temp.**       | IntexSpa/Cmd increase            | Down=1  | -       | -  
-| **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |              |
 | **ESP Reset**                | IntexSpa/Cmd Reset ESP            | reset | -       | -             |  
 | **Command Setpoint of Temp.**       | IntexSpa/Cmd Temperature Setpoint| "set a number"  | -       | -
+| **Status Communication with pump**| IntexSpa/Communication with pump | Com/OK=1   | 0=lost connection       | -   |Yes           |
 | **Heater Status**                   | IntexSpa/heater state       | standby=1 & ON=2  | OFF=0    | Yes
 | **Status Setpoint Temp.**         | IntexSpa/Temperature Setpoint    | -       | -       | Yes
 | **Send °F Temp.**     | IntexSpa/Farenheit Celsius       | -       | -       | Yes             |             |
@@ -139,7 +140,9 @@ const char* Mypassword = "YourPassword";
 | **Status Power on**          | IntexSpa/Power on                | -       | -       | Yes             |  
 | **Status Bubble on**         | IntexSpa/Bubble on               | -       | -       | Yes             |  
 | **Status Heater on**         | IntexSpa/heater on               | -       | -       | Yes             |  
-| **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |  
+| **Status Filter on**         | IntexSpa/filter on               | -       | -       | Yes             |
+| **Status Filter Timer**         | IntexSpa/filter setup time               | -       | -       | Yes             |    
+
 
 
 ***Only for Spa #28458 #28462***
@@ -147,9 +150,11 @@ const char* Mypassword = "YourPassword";
 | Description | Topic String                   | Payload | Payload | Only Status          |
 |-------------|--------------------------------|---------|---------|-----------------|
 | **Water Jet**             |  IntexSpa/Cmd water jet on off | ON=1    | OFF=0   | -               |
-| **Sanizer**               | IntexSpa/Cmd sanizer on off    | ON=1    | OFF=0   | -               |
+| **Sanitizer**               | IntexSpa/Cmd sanitizer on off    | ON=1    | OFF=0   | -               |
 | **Status Water Jet**      | IntexSpa/Water jet on          | -       | -       | Yes             |
-| **Status Sanizer**        | IntexSpa/Sanizer on            | -       | -       | Yes             |
+| **Sanitizer Timer**               | IntexSpa/Cmd Sanitizer time    | hours=3,5,8    | -  | -               |
+| **Status Sanitizer**        | IntexSpa/Sanitizer on            | -       | -       | Yes             |
+| **Status Sanitizer Timer**        | IntexSpa/Sanitizer setup time            | -       | -       | Yes             |
 
 
 
@@ -210,7 +215,11 @@ You can use it as you want, I'll show you an example of a part of the files conf
   - All your automation settings such as push-notification on your mobile phone.
 
 
-## Jeedom (comming soon)
+## Jeedom 
+you can found some information on the [Jeedom Community thread](https://community.jeedom.com/t/intex-purespa-avec-commande-sans-fils/59334)
+
+more information are comming soon
+
 
 ## The official Intex® PureSpa instructions
 
@@ -221,8 +230,6 @@ You can use it as you want, I'll show you an example of a part of the files conf
 
 
 ## Known issues
--  **Water Filter control doesn't work as espected** 
--  **Sanizer control doesn't work as espected** 
 -  **MySensors isn't implemented** 
 
 

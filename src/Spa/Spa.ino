@@ -62,8 +62,8 @@
 #define _MQTT_
 
 #ifdef ESP32
-const char* Myssid = "MySSID";
-const char* Mypassword = "MyPassword";
+const char* Myssid = "YourSSID";
+const char* Mypassword = "YourPassword";
 #endif
 
 
@@ -77,9 +77,9 @@ const char* Mypassword = "MyPassword";
 EspMQTTClient client(
   Myssid,
   Mypassword,
-  "111.111.111.111",  // MQTT Broker server ip
-  "MQTTUsername",   // Can be omitted if not needed
-  "MQTTPassword",   // Can be omitted if not needed
+  "YourMQTT-Broker-IP",  // MQTT Broker server ip
+  "NameMQTTBroker",   // Can be omitted if not needed
+  "PasswordMQTTBroker",   // Can be omitted if not needed
   "IntexSpa",     // Client name that uniquely identify your device
   1883              // The MQTT port, default to 1883. this line can be omitted
 );
@@ -87,10 +87,10 @@ EspMQTTClient client(
 
 //Uncomment following line to have more debug infos
 //#define DEBUG_RECIEVED_DATA
-#define DEBUG_SEARCH_CHANNEL
+//#define DEBUG_SEARCH_CHANNEL
 #define DEBUG_SEND_COMMAND
 #define DEBUG_PUMP_DATA
-//#define DEBUG_CONTROLER_DATA
+//#define DEBUG_CONTROLLER_DATA
 //#define DEBUG_CONFIG
 #define DEBUG_MQTT
 //#define DEBUG_SEND_VALUE_TO_HOME_AUTOMATION_SW
@@ -120,26 +120,30 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #endif
 
 //Command
-#define COMMAND_ON_OFF              0x0001    
-#define COMMAND_WATER_FILTER        0x0010    
-#define COMMAND_BUBBLE              0x0020    
-#define COMMAND_HEATER              0x0040    
-#define COMMAND_CELSIUS_FARENHEIT   0x0002    
-#define COMMAND_DECREASE            0x0008    
-#define COMMAND_INCREASE            0x0004    
+#define COMMAND_ON_OFF                0x0001    
+#define COMMAND_WATER_FILTER          0x0010    
+#define COMMAND_BUBBLE                0x0020    
+#define COMMAND_HEATER                0x0040    
+#define COMMAND_CELSIUS_FARENHEIT     0x0002    
+#define COMMAND_DECREASE              0x0008    
+#define COMMAND_INCREASE              0x0004    
 
 #ifdef _28458_28462_
-#define COMMAND_WATER_JET           0x0100    
-#define COMMAND_SANITIZER           0x0080    
+#define COMMAND_WATER_JET             0x0100    
+#define COMMAND_SANITIZER             0x0080    
 #endif
 // Status Byte number
-#define BYTE_STATUS_STATUS          2
-#define BYTE_STATUS_COMMAND         4
+#define BYTE_STATUS_STATUS            2
+#define BYTE_STATUS_COMMAND           4
 
-#define BYTE_ACTUAL_TEMPERATURE     5
-#define BYTE_SETPOINT_TEMPERATURE   7
+#define BYTE_ACTUAL_TEMPERATURE       5
+#define BYTE_SETPOINT_TEMPERATURE     7
 
-#define BYTE_ERROR                  14
+#define BYTE_SETPOINT_TIME_SANITIZER  8
+
+#define BYTE_SETPOINT_TIME_FILTER     12
+
+#define BYTE_ERROR                    14
 
 //Value Pump bytes
 #define VALUE_CONTROLLER_ON           0x01
@@ -159,13 +163,13 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #define VALUE_COMMAND_RECIVED         0x80
 
 // Commande bytes
-#define BYTE_CONTROLER_LOADING      3
+#define BYTE_CONTROLLER_LOADING        3
 
-// Value Controler bytes
+// Value Controller bytes
 
 //varibles for datamanagement
 #define SIZE_CONTROLLER_DATA         8
-unsigned char DataControler[SIZE_CONTROLLER_DATA +2];
+unsigned char DataController[SIZE_CONTROLLER_DATA +2];
 
 //Id for mysensors and for memo
 uint16_t MemValueSended[40];
@@ -175,14 +179,18 @@ uint16_t MemValueSended[40];
 #define ID_HEATER_ON                3
 #define ID_HEATER_STATE             4
 #define ID_WATER_FILTER_ON          5
-#define ID_VALUE_WATER_JET_ON       6
-#define ID_SANITIZER_ON             7
+#define ID_WATER_FILTER_TIME        6
+#define ID_VALUE_WATER_JET_ON       7
+#define ID_SANITIZER_ON             8
+#define ID_SANITIZER_TIME           9
 
 #define ID_FARENHEIT                15
 
 #define ID_SETPOINT_TEMPERATURE     20
 #define ID_ACTUAL_TEMPERATURE       21
 #define ID_TARGET_TEMPERATURE       22
+#define ID_TARGET_FILTER_TIME       23
+#define ID_TARGET_SANITIZER_TIME    24
 
 #define ID_ERROR_CODE               35
 #define ID_COM_PUMP                 36
@@ -196,7 +204,6 @@ auto t = timer_create_default(); // create a timer with default settings
 bool FinishPumpMessage;
 bool FinishControllerMessage;
 char ControllerLoadingState;
-bool TempWindowsOpen;
 uint16_t state;
 uint16_t CommandToSend =0x0000;
 bool CommandRecived;
@@ -209,9 +216,22 @@ uint16_t SearchChannelDataCount;
 uint8_t UsedChannel;
 uint8_t FirstCommandChar;
 uint16_t ChannelChangeOk;
+bool FarenheitCelsius;
 uint8_t ActualSetpointTemperarue;
 uint8_t TargetSetpointTemperarue;
 bool ChangeTargetSetpointTemperarue;
+bool ChangeSetpointRecirculationTime;
+uint8_t ActualSetpointRecirculationTime;
+uint8_t TargetSetpointRecirculationTime;
+bool SwitchOffRecirculation;
+bool StateRecirculation;
+#ifdef _28458_28462_
+bool ChangeSetpointSanitizerTime;
+uint8_t ActualSetpointSanitizerTime;
+uint8_t TargetSetpointSanitizerTime;
+bool SwitchOffSanitizer;
+bool StateSanitizer;
+#endif
 
 //Setup
 void setup() {
@@ -288,7 +308,7 @@ void setup() {
 #endif  
   UsedChannel = EEPROM.read(17)< 128? EEPROM.read(17):DefaultChannel ;
   FirstCommandChar = EEPROM.read(18)< 256? EEPROM.read(18):DefaultFirstCommandChar;
-  
+
   Serial.print (F("Used Channel read from EEPROM 0x"));
   Serial.println(UsedChannel,HEX);
   Serial.print (F("Used first command read from EEPROM 0x"));
@@ -347,14 +367,13 @@ void loop() {
         if (c == FirstCommandChar){
           Serial.println(" ");
         }
-          
         Serial.print(res);
-        Serial.print(" ");               
-#endif      
+        Serial.print(" ");
+#endif
        }
      }
    }
- 
+
    //Manage pump message
    if (FinishPumpMessage)
    {
@@ -366,6 +385,10 @@ void loop() {
        DataManagement();
        SendCommandManagement (&CommandToSend);
        SendTemperatureSetpoint();
+       SendSpecialCommand(COMMAND_WATER_FILTER, &ChangeSetpointRecirculationTime, SwitchOffRecirculation,TargetSetpointRecirculationTime, ActualSetpointRecirculationTime);
+    #ifdef _28458_28462_
+       SendSpecialCommand(COMMAND_SANITIZER, &ChangeSetpointSanitizerTime, SwitchOffSanitizer,TargetSetpointSanitizerTime, ActualSetpointSanitizerTime);
+    #endif
        state =0;
        FirstSend = true;
        FinishPumpMessage = false;  
@@ -376,16 +399,17 @@ void loop() {
    //Manage Controller message
    if (FinishControllerMessage)
    {
-#ifdef DEBUG_CONTROLER_DATA
+#ifdef DEBUG_CONTROLLER_DATA
+    Serial.print("Debug Controller data : ");
     char res2[5]; 
     for (uint8_t i =0; i<SIZE_CONTROLLER_DATA;i++){
-      sprintf(&res2[0],"%02X",DataControler[i]);
+      sprintf(&res2[0],"%02X",DataController[i]);
       Serial.print(res2);
       Serial.print(" ");
     }
     Serial.println(" ");
 #endif    
-      ControllerLoadingState = DataControler[BYTE_CONTROLER_LOADING];
+      ControllerLoadingState = DataController[BYTE_CONTROLLER_LOADING];
       FinishControllerMessage = false;
    }
 #ifdef _MY_SENSORS_   
@@ -400,18 +424,25 @@ void loop() {
      }
 #endif
   // check communication pump timeout
-  if (millis() - LastTimeReciveData > 4000 ){
-    SendValue("IntexSpa/Communication with pump", false,ID_COM_PUMP); 
-    ErrorCommunicationWithPump = true;
-  }
-  else{
-    SendValue("IntexSpa/Communication with pump", true,ID_COM_PUMP); 
-    ErrorCommunicationWithPump = false;
-  }
-   
+#ifdef _28442_28440_
+    if  (   (ChannelChangeOk > 14)
+         || FirstSend
+       )
+#endif
+    {  
+      if (millis() - LastTimeReciveData > 4000)
+        {
+        SendValue("IntexSpa/Communication with pump", false,ID_COM_PUMP); 
+        ErrorCommunicationWithPump = true;
+      }
+      else{
+        SendValue("IntexSpa/Communication with pump", true,ID_COM_PUMP); 
+        ErrorCommunicationWithPump = false;
+      }
+    }
   //Try to find the new channel in case of pump change channel
   if (   !FirstSend 
-      &&  (millis() - LastTimeReciveData > 2000 )
+      &&  (millis() - LastTimeReciveData > 6000 )
 #ifdef _MQTT_ 
       &&  client.isConnected()      
 #endif
@@ -422,7 +453,7 @@ void loop() {
      }
 #elif defined  (_28442_28440_)
      if (ChannelChangeOk == 1){
-      FirstCommandChar = FirstCommandChar -6;
+      FirstCommandChar = FirstCommandChar -6;      
      }
      if (ChannelChangeOk >0 && ChannelChangeOk < 15){ 
         LastTimeReciveData = millis();
@@ -456,7 +487,7 @@ void loop() {
 #endif      
   }
 
-}
+} //void loop() 
 
 //Managed data recived from the LC12s
 void ReadData (unsigned char c)
@@ -467,7 +498,7 @@ void ReadData (unsigned char c)
       {
         DataCounter=0;
         memset (&Data,0,sizeof(Data));
-        memset (&DataControler,0,sizeof(DataControler));
+        memset (&DataController,0,sizeof(DataController));
         
         if (c == FirstCommandChar)
         {
@@ -483,12 +514,12 @@ void ReadData (unsigned char c)
         Data[DataCounter] =c;
         DataCounter++;
 
-        //it was a message from controler
+        //it was a message from controller
         if (c == FirstCommandChar && DataCounter< SIZE_PUMP_DATA  && DataCounter > SIZE_CONTROLLER_DATA )
         {     
-          memcpy (&DataControler,&Data, 8);          
+          memcpy (&DataController,&Data, 8);          
           //Calclulate an check Checksum
-          uint16_t crc_out = calc_crc((char*) DataControler,SIZE_CONTROLLER_DATA -2);      
+          uint16_t crc_out = calc_crc((char*) DataController,SIZE_CONTROLLER_DATA -2);      
           //Checksum ok
           if (   (Data[SIZE_CONTROLLER_DATA-2] == ((crc_out & 0xFF00) >> 8 ))
               && (Data[SIZE_CONTROLLER_DATA-1] == (crc_out & 0x00FF))
@@ -532,18 +563,31 @@ void ReadData (unsigned char c)
 void onConnectionEstablished()
 {
    //manage command power on/off
-   client.subscribe("IntexSpa/Cmd Power on off", [](const String & payload) {
-    if (payload== "1" || payload== "0"){
-      CommandToSend |= COMMAND_ON_OFF ;
-      LastTimeSendData = millis();
-    }
-  });
+    client.subscribe("IntexSpa/Cmd Power on off", [](const String & payload) {
+      if (payload== "1" || payload== "0"){
+        CommandToSend |= COMMAND_ON_OFF ;
+        LastTimeSendData = millis();
+      }
+    });
+
+    //Target Filter time
+    client.subscribe("IntexSpa/Cmd water filter time", [](const String & payload) {
+      if( (payload== "2" || payload == "4" || payload == "6") ){
+        ChangeSetpointRecirculationTime =  StateRecirculation;
+        TargetSetpointRecirculationTime = payload.toInt();
+             
+      }
+    });
 
    //manage command water filter on/off
-   client.subscribe("IntexSpa/Cmd water filter on off", [](const String & payload) {
-   if (payload== "1" || payload== "0"){
-      CommandToSend |= COMMAND_WATER_FILTER;
-      LastTimeSendData = millis();
+   client.subscribe("IntexSpa/Cmd water filter on off", [](const String & payload) { 
+   if (payload== "1" && (TargetSetpointRecirculationTime== 2 || TargetSetpointRecirculationTime == 4 || TargetSetpointRecirculationTime == 6)){
+      ChangeSetpointRecirculationTime = true;
+      SwitchOffRecirculation = false;
+    }
+    else if(payload== "0"){
+      ChangeSetpointRecirculationTime = true;
+      SwitchOffRecirculation = true;
     }
   });
 
@@ -570,7 +614,6 @@ void onConnectionEstablished()
       LastTimeSendData = millis();
     }      
   }); 
-
     
    //manage command decrease
    client.subscribe("IntexSpa/Cmd decrease", [](const String & payload) {
@@ -578,8 +621,7 @@ void onConnectionEstablished()
    {
       LastTimeSendData = millis();
       TargetSetpointTemperarue = TargetSetpointTemperarue -1;
-      ChangeTargetSetpointTemperarue = true;
-      
+      ChangeTargetSetpointTemperarue = true;     
     }
   }); 
 
@@ -598,15 +640,12 @@ void onConnectionEstablished()
     ChangeTargetSetpointTemperarue = true;
   }); 
 
-
    // reset
    client.subscribe("IntexSpa/Cmd Reset ESP", [](const String & payload) {
     if (payload== "reset"){
       ESP.restart();
     }
-
   });   
-
 
 #ifdef _28458_28462_
    //manage command water jet on off
@@ -615,17 +654,28 @@ void onConnectionEstablished()
       CommandToSend |= COMMAND_WATER_JET;
       LastTimeSendData = millis();
     }
+   });   
 
-  });   
+    //Target Sanitizer time
+   client.subscribe("IntexSpa/Cmd Sanitizer time", [](const String & payload) {
+      if( (payload== "3" || payload == "5" || payload == "8") ){
+        ChangeSetpointSanitizerTime =  StateSanitizer;
+        TargetSetpointSanitizerTime = payload.toInt();            
+      }
+    });
 
-   //manage command sanizer on off
-   client.subscribe("IntexSpa/Cmd sanizer on off", [](const String & payload) {
-    if (payload== "1"|| payload== "0"){
-      CommandToSend |= COMMAND_SANITIZER;
-      LastTimeSendData = millis();
+   //manage command sanitizer on/off
+   client.subscribe("IntexSpa/Cmd sanitizer on off", [](const String & payload) { 
+   if (payload== "1" && (TargetSetpointSanitizerTime== 3 || TargetSetpointSanitizerTime == 5 || TargetSetpointSanitizerTime == 8)){
+      ChangeSetpointSanitizerTime = true;
+      SwitchOffSanitizer = false;
     }
-      
-  }); 
+    else if(payload== "0"){
+      ChangeSetpointSanitizerTime = true;
+      SwitchOffSanitizer = true;
+    }
+  });
+
 #endif
   
 }
@@ -663,16 +713,38 @@ void DataManagement (){
    SendValue("IntexSpa/heater state", HeaterState ,ID_HEATER_STATE); 
 
    //Send water filter on 
+   StateRecirculation =(bool)(Data[BYTE_STATUS_COMMAND] & VALUE_WATER_FILTER_ON);
    SendValue("IntexSpa/filter on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_WATER_FILTER_ON),ID_WATER_FILTER_ON); 
+
+   //Send actual filter setup time
+   ActualSetpointRecirculationTime = Data[BYTE_SETPOINT_TIME_FILTER];
+   SendValue("IntexSpa/filter setup time", Data[BYTE_SETPOINT_TIME_FILTER],ID_WATER_FILTER_TIME); 
+   if (!ChangeSetpointRecirculationTime && ActualSetpointRecirculationTime)
+   {
+       TargetSetpointRecirculationTime =ActualSetpointRecirculationTime;
+       SendValue("IntexSpa/Cmd water filter time", Data[BYTE_SETPOINT_TIME_FILTER],ID_TARGET_FILTER_TIME);   
+   }
+
 #ifdef _28458_28462_
    //Send water jet on 
    SendValue("IntexSpa/Water jet on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_WATER_JET_ON),ID_VALUE_WATER_JET_ON); 
 
-   //Send water sanizer on 
-   SendValue("IntexSpa/Sanizer on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_SANITIZER_ON),ID_SANITIZER_ON); 
+  //Send water sanitizer on 
+   StateSanitizer =(bool)(Data[BYTE_STATUS_COMMAND] & VALUE_SANITIZER_ON);
+   SendValue("IntexSpa/Sanitizer on", (bool)(Data[BYTE_STATUS_COMMAND] & VALUE_SANITIZER_ON),ID_SANITIZER_ON); 
+
+   //Send actual filter setup time
+   ActualSetpointSanitizerTime = Data[BYTE_SETPOINT_TIME_SANITIZER];
+   SendValue("IntexSpa/Sanitizer setup time", Data[BYTE_SETPOINT_TIME_SANITIZER],ID_SANITIZER_TIME); 
+   if (!ChangeSetpointSanitizerTime && ActualSetpointSanitizerTime)
+   {
+       TargetSetpointSanitizerTime =ActualSetpointSanitizerTime;
+       SendValue("IntexSpa/Cmd Sanitizer time", Data[BYTE_SETPOINT_TIME_SANITIZER],ID_TARGET_SANITIZER_TIME);   
+   }  
 #endif   
    
    //Send Farenheit selected
+   FarenheitCelsius = (bool)(Data[BYTE_STATUS_STATUS] & VALUE_FARENHEIT);
    SendValue("IntexSpa/Farenheit Celsius", (bool)(Data[BYTE_STATUS_STATUS] & VALUE_FARENHEIT),ID_FARENHEIT); 
 
    //Send temperature setpoint
@@ -689,14 +761,6 @@ void DataManagement (){
 
   //send Error number
    SendValue("IntexSpa/Error Number", Data[BYTE_ERROR],ID_ERROR_CODE); 
-
-  // manage temperature windows open
-  if (Data[BYTE_STATUS_STATUS] & VALUE_TEMP_WINDOWS_OPEN){
-    TempWindowsOpen = true;
-  }
-  else{
-    TempWindowsOpen = false;
-  }
 
   //Manage Command recived
   if (Data[BYTE_STATUS_STATUS] & VALUE_COMMAND_RECIVED){
@@ -722,8 +786,10 @@ void SendTemperatureSetpoint(){
     
   // setpoint is done  
   if (    TargetSetpointTemperarue == ActualSetpointTemperarue
-      ||  TargetSetpointTemperarue > 40
-      ||  TargetSetpointTemperarue < 14
+      ||  (TargetSetpointTemperarue > 40  && !FarenheitCelsius)
+      ||  (TargetSetpointTemperarue < 10  && !FarenheitCelsius)
+      ||  (TargetSetpointTemperarue > 50  &&  FarenheitCelsius)
+      ||  (TargetSetpointTemperarue < 104 &&  FarenheitCelsius)
      ){
     ChangeTargetSetpointTemperarue   = false;
     return;
@@ -744,6 +810,41 @@ void SendTemperatureSetpoint(){
   }
 }
 
+//function to send Recirculation and sanizer command 
+void SendSpecialCommand( uint16_t Command, bool *CommandChange, bool CommandOff,uint8_t SetupValue ,uint8_t ActualValue ){
+
+    if (     !Command 
+          || !*CommandChange 
+       )
+    return;
+
+  //nothing to do 
+  if (!CommandChange)
+  {
+    CommandOff =false;
+    return;
+  }
+    
+  // command is pendling actualy nothing else to do   
+  if (CommandToSend & Command)
+  {
+    return;
+  }
+
+  // Sepoint is done
+  if (    ((SetupValue == ActualValue)&& !CommandOff)
+      ||  ((ActualValue == 0x00) && CommandOff)
+     )
+  {
+    *CommandChange   = false;
+    return;
+  }
+  // send command
+  LastTimeSendData = millis();
+  CommandToSend |= Command;
+  
+}
+
 #ifdef _MY_SENSORS_
 void MySensorsCommandManagement(){
 
@@ -759,23 +860,25 @@ void SendCommandManagement (uint16_t *Command){
     return;
 
   if(    CommandRecived
-     ||  (millis() -LastTimeSendData> 600) // timeout
+     ||  (millis() -LastTimeSendData> 2000) // timeout
     )
   {
     *Command = 0x0000;
     return;
   }
   SendCommand(*Command);
-  
+
 }
-//Send commant to recive all info in case the controller is not close to pump (E81 on controler or off)
+
+//Send commant to recive all info in case the controller is not close to pump (E81 on controller or off)
 bool SendLifeFct(void *)
 {
 #ifdef _MQTT_ 
     if (client.isConnected() && !ErrorCommunicationWithPump)
 #endif
     {
-      SendCommand(0x0000);
+      if (!CommandToSend)
+        SendCommand(0x0000);
     }
     return true;
 }
@@ -877,7 +980,10 @@ bool SearchChannel(){
         Serial.println(F(""));
         Serial.print(F("Found channel 0x"));
         Serial.println(res);
-#endif  
+        sprintf(&res[0],"%02X",FirstCommandChar);
+        Serial.print(F("First Command Char 0x"));
+        Serial.println(res);
+#endif         
         return true;             
       }
      }
@@ -907,13 +1013,13 @@ void SetSettings(char Channel){
   Config[7]=0x00;
   
   //RF Power
-  Config[8]=0x03; 
+  Config[8]=0x00; 
   
   Config[9]=0x00; 
 
   // Baudrate
   Config[10]=0x04; 
-  
+ 
   Config[11]=0x00;
   //Channel
   Config[12]=Channel;
