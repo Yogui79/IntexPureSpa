@@ -43,7 +43,7 @@
 *   S E L E C T    Y O U R   S P A   M O D E L 
 *  
 ********************************************************/
-#define _28458_28462_
+//#define _28458_28462_
 //#define _28442_28440_
 
 #if  defined (_28458_28462_) &&  defined (_28442_28440_)
@@ -118,6 +118,11 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #endif
+
+//Version and date
+#define _VERSION         "1.1.0"
+#define _BUILD_DATE_TIME "2021.05.24 15:04:32"
+
 
 //Command
 #define COMMAND_ON_OFF                0x0001    
@@ -238,6 +243,16 @@ void setup() {
  
   mySerial.begin(9600);
   Serial.begin(115200);
+
+  Serial.println(F("----------------------------------------------------------------------------------------------------------------------")); 
+  Serial.println(F(""));
+  Serial.print (F("          Intex Purespa communication sketch version "));  
+  Serial.print (_VERSION);
+  Serial.print (F(" build on : "));
+  Serial.println (_BUILD_DATE_TIME "2021.05.24 15:04:32"
+  Serial.println(F(""));
+  Serial.println(F("----------------------------------------------------------------------------------------------------------------------"));  
+  
 #ifdef ESP32
   Serial.println("Booting");
   WiFi.mode(WIFI_STA);
