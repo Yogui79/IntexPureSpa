@@ -216,9 +216,22 @@ You can use it as you want, I'll show you an example of a part of the files conf
 
 
 ## Jeedom 
-you can found some information on the [Jeedom Community thread](https://community.jeedom.com/t/intex-purespa-avec-commande-sans-fils/59334)
 
-more information are comming soon
+Is a powerful and innovative open source home automation software. [www.jeedom.com](https://jeedom.com/)
+
+**Screenshot & Video:**
+1. [Screenshot dashboard view](Docs/Image/10.Jeedom-Dashboard.png)
+2. [Wiring video](https://www.youtube.com/watch?v=50lxF08o_vo) thanks [@Dim](https://github.com/jeedom-help-Dim-Ant)
+3. Configuration video **comming soon**.
+
+
+**Config of Jeedom:** 
+
+Template for the MQTT topics are avalable inside the beta version from the jeedom plugin jMQTT
+
+**On jeedom Community thread:** 
+
+you can found some information/help (in french) on the [Jeedom Community thread](https://community.jeedom.com/t/intex-purespa-avec-commande-sans-fils/59334)
 
 
 ## The official Intex® PureSpa instructions
