@@ -434,6 +434,18 @@ void loop() {
         {
         SendValue("IntexSpa/Communication with pump", false,ID_COM_PUMP); 
         ErrorCommunicationWithPump = true;
+#ifdef _28442_28440_
+        if ( FirstCommandChar - UsedChannel> 0x80 ){
+          Serial.println (F("Rebase channel to first command char"));
+          UsedChannel = FirstCommandChar-0x80;
+          SetSettings(UsedChannel);
+          EEPROM.write(17, UsedChannel);
+  #ifdef ESP32
+          EEPROM.commit();
+  #endif        
+        }
+#endif
+        
       }
       else{
         SendValue("IntexSpa/Communication with pump", true,ID_COM_PUMP); 
