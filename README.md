@@ -227,7 +227,7 @@ Is a powerful and innovative open source home automation software. [www.jeedom.c
 
 **Config of Jeedom:** 
 
-Template for the MQTT topics are avalable inside the beta version from the jeedom plugin jMQTT
+Template for the MQTT topics are available inside the beta version from the jeedom plugin jMQTT
 
 **On jeedom Community thread:** 
 
