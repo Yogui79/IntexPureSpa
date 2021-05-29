@@ -121,7 +121,7 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 
 //Version and date
 #define _VERSION         "1.1.0"
-#define _BUILD_DATE_TIME "2021.05.24 15:04:32"
+#define _BUILD_DATE_TIME "2021.05.29 22:25:18"
 
 
 //Command
@@ -249,7 +249,7 @@ void setup() {
   Serial.print (F("          Intex Purespa communication sketch version "));  
   Serial.print (_VERSION);
   Serial.print (F(" build on : "));
-  Serial.println (_BUILD_DATE_TIME "2021.05.24 15:04:32"
+  Serial.println (_BUILD_DATE_TIME);  
   Serial.println(F(""));
   Serial.println(F("----------------------------------------------------------------------------------------------------------------------"));  
   
@@ -445,7 +445,7 @@ void loop() {
        )
 #endif
     {  
-      if (millis() - LastTimeReciveData > 4000)
+      if (millis() - LastTimeReciveData > 5000)
         {
         SendValue("IntexSpa/Communication with pump", false,ID_COM_PUMP); 
         ErrorCommunicationWithPump = true;
