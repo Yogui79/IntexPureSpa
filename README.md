@@ -5,11 +5,12 @@ No hardware modification and used with Smart Home (optimized for [Jeedom](www.je
 
 ## Pictures & Videos
 ![ESP32 to LC12s](Docs/Image/App_2-small.jpg)
+-------
+- <img src="Docs/Image/Box_LC12s-ESP32_2-small.jpg" width="500" height="281" >
+-------
 - [Video - Controlling in Action](https://youtu.be/uz7ssMk9tW4)
 - [Video - Home Assistant - Screen Recording ](https://youtu.be/5Z1keongL40)
 - [Video - Box LC12s & ESP32](https://youtu.be/aqid8pSHN-g)
-- [Picture - LC12s & ESP32](Docs/Image/Box_LC12s-ESP32_2-small.jpg)
-- <img src="Docs/Image/App_2-small.jpg" width="500" height="281" >
 
 ## Hardware to you need
 
