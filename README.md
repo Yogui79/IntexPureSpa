@@ -74,7 +74,7 @@ But I write some help software for that.
     -   Upload the code to your ESP32 or Arduino
     -   Wait untill the right network id is founded **this can take up to 36 hours.** It will be displayed on your Serial Monitor software and save into the file.
 
-## PureSpa Sofware
+## PureSpa Software
 Now you can [Download](src/Spa/) the PureSpa code change it to your settings and upload it to your ESP or Arduino
 
 ##  Channel and Network id configuration
