@@ -20,12 +20,13 @@ No hardware modification and used with Smart Home (optimized for [Jeedom](www.je
 ## Software to you need
 
 -   [**Arduino IDE**](https://www.arduino.cc/en/software)
--   **Install the “[ESP32 Dev Kit C V4](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)” Board for Arduino IDE**  ->  [Screenshot](Docs/Image/Board-Screenshot-IDE.PNG)
+-   **Install the “[ESP32 Dev Kit C V4](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)” ** (V1 boards not  work)
+-   **Install ESP32 Board for  Arduino IDE (verssion 1.0.6)  ->  [Screenshot](Docs/Image/Board-Screenshot-IDE.PNG). **
 -   **Install the following libraries**  (use the Arduino Library Manager)
     -   EspMQTTClient
     -   arduino-timer
-    -   WiFi
-    -   ESPmDNS
+    -   WiFi (comming with Board Driver in Arduino IDE)
+    -   ESPmDNS (comming with Board Driver in Arduino IDE)
     -   ArduinoOTA
     -   SoftwareSerial (only for Arduino)
     -   MySensors (only supported for Arduino)
