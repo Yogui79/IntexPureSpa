@@ -1,6 +1,6 @@
 # Intex® PureSpa remote control for Home Automation
 
-**Control your PureSpa over MQTT or MySensors *(comming soon)*** for  **#28458, #28462, #28461(US) & #28442, #28440, 28457(US)**. 
+**Control your PureSpa over MQTT or MySensors *(comming soon)*** for  **#28458, #28462, 28457(US), #28461(US) & #28442, #28440**. 
 No hardware modification and used with Smart Home (optimized for [Jeedom](www.jeedom.com) & [Home Assistant](https://www.home-assistant.io)).
 
 ## Pictures & Videos
@@ -148,7 +148,7 @@ const char* Mypassword = "YourPassword";
 
 
 
-***Only for Spa #28458, #28462, #28461***
+***Only for Spa #28458, #28462, #28457(US) #28461(US)***
  
 | Description | Topic String                   | Payload | Payload | Only Status          |
 |-------------|--------------------------------|---------|---------|-----------------|
@@ -241,8 +241,8 @@ you can found some information/help (in french) on the [Jeedom Community thread]
 
 | Articel No. | English  | German   |
 |-------------|----------|----------|
-| 28462, 28458 & 28461    | [Download](Docs/28462-28458_344IO_202_EN_.pdf) | [Download](Docs/28462_28458_344IO_2020_DE.pdf) |
-| 28442, 28440 & 28457      | [Download](Docs/28442-28440_346IO_2020_EN.pdf) | [Download](Docs/28442_28440_346IO_2020_DE.pdf) |
+| 28462, 28458 & 28457, 28561    | [Download](Docs/28462-28458_344IO_202_EN_.pdf) | [Download](Docs/28462_28458_344IO_2020_DE.pdf) |
+| 28442, 28440  | [Download](Docs/28442-28440_346IO_2020_EN.pdf) | [Download](Docs/28442_28440_346IO_2020_DE.pdf) |
 
 
 ## Known issues
