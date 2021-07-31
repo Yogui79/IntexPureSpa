@@ -43,8 +43,8 @@
 *   S E L E C T    Y O U R   S P A   M O D E L 
 *  
 ********************************************************/
-//#define _28458_28462_
-//#define _28442_28440_
+//#define _28458_28462_   // For spa model #28458 #28462 #28457(US) #28461(US)
+//#define _28442_28440_   // For spa Model #28442 #28440
 
 #if  defined (_28458_28462_) &&  defined (_28442_28440_)
   #error select only one SPA model
@@ -120,8 +120,8 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #endif
 
 //Version and date
-#define _VERSION         "1.1.0"
-#define _BUILD_DATE_TIME "2021.05.29 22:25:18"
+#define _VERSION         "1.1.1"
+#define _BUILD_DATE_TIME "2021.07.31 21:27:53"
 
 
 //Command
