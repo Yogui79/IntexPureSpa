@@ -3,7 +3,7 @@
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
@@ -11,7 +11,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *   Pin connection
- *                      
+ *
  *                       LC12S     Arduino     ESP
  *  ___________________
  * |                  o| GNG       GND         GND
@@ -23,7 +23,7 @@
 
 */
 
-uint8_t test= 0x00;
+uint8_t currentChannelId = 0x00; //This is where the scan starts. It will scan all 128 channels (0x00 through 0x7F) by default
 
 
 
@@ -41,140 +41,143 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 
 
 void setup() {
-  mySerial.begin(9600);
-  Serial.begin(115200);
+	mySerial.begin(9600);
+	Serial.begin(115200);
 
-  pinMode(DO_SET, OUTPUT);        // SET
-  pinMode(DO_CS, OUTPUT);        // CS - можно просто соединить с GND
-  delay(1000);
-  
-  digitalWrite(DO_CS, LOW);     // притягиваем к массе 
-  digitalWrite(DO_SET, LOW);
-  delay(100);
+	pinMode(DO_SET, OUTPUT);        // SET
+	pinMode(DO_CS, OUTPUT);        // CS - можно просто соединить с GND
+	delay(1000);
 
- // querryversion();
+	digitalWrite(DO_CS, LOW);     // притягиваем к массе 
+	digitalWrite(DO_SET, LOW);
+	delay(100);
 
-
+	// querryversion();
 }
 
 void loop() {
 
-  SetSettingsChannel(test++);
-  Serial.print("Channel "); 
-  Serial.println(test-1, HEX);
-  delay(1000);
+	SetSettingsChannel(currentChannelId++);
+	Serial.print("Channel ");
+	Serial.println(currentChannelId - 1, HEX);
+	delay(1000);
+
+	if (currentChannelId >= 127) {
+		Serial.println("Reached end of channels - starting over.");
+		Serial.println("Channel not found? Try a darker room. The flash is much darker than the status light.");
+		currentChannelId = 0;
+	}
 }
 
 
 
 
 
-void SetSettingsChannel(uint8_t channelid){
-  byte Config[20];
-  char res[5];
-  
-  
-  Config[1]=0xAA;  
-  Config[2]=0x5A;
-  
-  //device ID
-  Config[3]=0xB9; 
-  Config[4]=0x46;
+void SetSettingsChannel(uint8_t channelid) {
+	byte Config[20];
+	char res[5];
 
 
-//Network ID
-  Config[5]=0x00;
-  Config[6]=0X00;
-   
-  Config[7]=0x00;
-  
-  //RF Power
-  Config[8]=0x03; 
-  
-  Config[9]=0x00; 
+	Config[1] = 0xAA;
+	Config[2] = 0x5A;
 
-  // Baudrate
-  Config[10]=0x04; 
-  
-  Config[11]=0x00;
-  //channel
-  Config[12]=channelid;
-  
-  Config[13]=0x00;
-  Config[14]=0x00;
-  Config[15]=0x00;
-  Config[16]=0x12;
-  Config[17]=0x00;
-  //reset checksum
-  Config[18] =0x0;
+	//device ID
+	Config[3] = 0xB9;
+	Config[4] = 0x46;
 
-  //calculate Checsum
-  for(int i=1;i<17;i++){
 
-    Config[18] =Config[18] +Config[i];
-  }
-/*
-  Serial.print (F(" Config "));
-  for(int i=1;i<19;i++){
-    sprintf(&res[0],"%02X",Config[i]);
-    Serial.print(res);
-    Serial.print(F(" "));    
-  }
-  Serial.println (F(""));
-*/
-  digitalWrite(DO_SET, LOW);
-  delay(500);
+	//Network ID
+	Config[5] = 0x00;
+	Config[6] = 0X00;
 
-  for(int i=1;i<19;i++){
+	Config[7] = 0x00;
 
-    mySerial.write(Config[i]);
-  }
- delay(1000);
+	//RF Power
+	Config[8] = 0x03;
 
- digitalWrite(DO_SET, HIGH);
- 
+	Config[9] = 0x00;
 
+	// Baudrate
+	Config[10] = 0x04;
+
+	Config[11] = 0x00;
+	//channel
+	Config[12] = channelid;
+
+	Config[13] = 0x00;
+	Config[14] = 0x00;
+	Config[15] = 0x00;
+	Config[16] = 0x12;
+	Config[17] = 0x00;
+	//reset checksum
+	Config[18] = 0x0;
+
+	//calculate Checsum
+	for (int i = 1;i < 17;i++) {
+
+		Config[18] = Config[18] + Config[i];
+	}
+	/*
+	  Serial.print (F(" Config "));
+	  for(int i=1;i<19;i++){
+		sprintf(&res[0],"%02X",Config[i]);
+		Serial.print(res);
+		Serial.print(F(" "));
+	  }
+	  Serial.println (F(""));
+	*/
+	digitalWrite(DO_SET, LOW);
+	delay(50);
+
+	for (int i = 1;i < 19;i++) {
+		mySerial.write(Config[i]);
+	}
+
+	mySerial.flush();
+	delay(50);
+
+	digitalWrite(DO_SET, HIGH);
 }
 
-void querryversion(){
-  byte Config[20];
-  char res[5];
-    
-  //byte checksum;
-  Config[1]=0xAA;  
-  Config[2]=0x5D;
-  Config[3]=0x00; 
-  Config[4]=0x00; 
-  Config[5]=0x00;
-  Config[6]=0x00;
-  Config[7]=0x00;
-  Config[8]=0x00; 
-  Config[9]=0x00; 
-  Config[10]=0x00; 
-  Config[11]=0x00;
-  Config[12]=0x00;
-  Config[13]=0x00;
-  Config[14]=0x00;
-  Config[15]=0x00;
-  Config[16]=0x00;
-  Config[17]=0x00;
-  Config[18] =0x07;
-  
-  Serial.print (F("Querry version "));
-  for(int i=1;i<19;i++){
-    sprintf(&res[0],"%02X",Config[i]);
-    Serial.print(res);
-    Serial.print(" ");    
-  }
+void querryversion() {
+	byte Config[20];
+	char res[5];
 
-  Serial.println (F(""));
-  digitalWrite(DO_SET, LOW);
-  delay(500);
+	//byte checksum;
+	Config[1] = 0xAA;
+	Config[2] = 0x5D;
+	Config[3] = 0x00;
+	Config[4] = 0x00;
+	Config[5] = 0x00;
+	Config[6] = 0x00;
+	Config[7] = 0x00;
+	Config[8] = 0x00;
+	Config[9] = 0x00;
+	Config[10] = 0x00;
+	Config[11] = 0x00;
+	Config[12] = 0x00;
+	Config[13] = 0x00;
+	Config[14] = 0x00;
+	Config[15] = 0x00;
+	Config[16] = 0x00;
+	Config[17] = 0x00;
+	Config[18] = 0x07;
 
-  for(int i=1;i<19;i++){
+	Serial.print(F("Querry version "));
+	for (int i = 1;i < 19;i++) {
+		sprintf(&res[0], "%02X", Config[i]);
+		Serial.print(res);
+		Serial.print(" ");
+	}
 
-    mySerial.write(Config[i]);
-  }
- delay(1000);
- digitalWrite(DO_SET, HIGH);
+	Serial.println(F(""));
+	digitalWrite(DO_SET, LOW);
+	delay(500);
+
+	for (int i = 1;i < 19;i++) {
+
+		mySerial.write(Config[i]);
+	}
+	delay(1000);
+	digitalWrite(DO_SET, HIGH);
 }
