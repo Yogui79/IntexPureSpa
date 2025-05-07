@@ -3,15 +3,15 @@
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *                      
- *                      
- *                      
+ *
+ *
+ *
  *                       LC12S     Arduino     ESP
  *  ___________________
  * |                  o| GNG       GND         GND
@@ -24,9 +24,10 @@
 
 
 
-uint8_t Channel =0x47; 
-//#define SEARCH_NETWORK_ID
-uint16_t idtosend =0x0000;
+uint8_t Channel = 0x1A;  //Set this to the detected channel from the ChannelSearch tool. If everything works, the LED will flash slightly all the time with some short bright blinks about two times per second.
+
+#define SEARCH_NETWORK_ID
+uint16_t curProbedNetId = 0x0000;
 
 
 
@@ -44,196 +45,196 @@ SoftwareSerial mySerial(2, 4); // RX, TX
 #endif
 
 unsigned long LastTimeReciveData;
-uint16_t SearchNetworkIdDataCount; 
+uint16_t SearchNetworkIdDataCount;
 bool datareceived;
 bool NetworkIdOk;
 
 
 
 void setup() {
-  mySerial.begin(9600);
-  Serial.begin(115200);
-  pinMode(DO_SET, OUTPUT);        // SET
-  pinMode(DO_CS, OUTPUT);        // CS 
-  delay(1000);
-  
-  digitalWrite(DO_CS, LOW);     
-  digitalWrite(DO_SET, LOW);
-  Serial.println(F(""));
-  Serial.println(F("-----------------------------------------------------------")); 
-  Serial.println(F(""));
+	mySerial.begin(9600);
+	Serial.begin(115200);
+	pinMode(DO_SET, OUTPUT);        // SET
+	pinMode(DO_CS, OUTPUT);        // CS 
+	delay(1000);
+
+	digitalWrite(DO_CS, LOW);
+	digitalWrite(DO_SET, LOW);
+	Serial.println(F(""));
+	Serial.println(F("-----------------------------------------------------------"));
+	Serial.println(F(""));
 #ifdef SEARCH_NETWORK_ID
-  Serial.println (F("          Search Network id active"));
+	Serial.println(F("          Search Network id active"));
 #else
-  Serial.println (F("          Check Channel"));
-  Serial.println (F(""));
-  Serial.println (F("          LED on LC12s should blink fast"));  
+	Serial.println(F("          Check Channel"));
+	Serial.println(F(""));
+	Serial.println(F("          LED on LC12s should blink fast slightly, with bright flashes in between"));
 #endif
-  Serial.println(F(""));
-  Serial.println(F("-----------------------------------------------------------"));
+	Serial.println(F(""));
+	Serial.println(F("-----------------------------------------------------------"));
 
-  ChangeSettings(idtosend++);
- 
+	ChangeSettings(curProbedNetId++);
 
 
-  //querryversion();
+
+	//querryversion();
 }
 
 void loop() {
-char res[5];  
- #ifdef __AVR__
-   mySerial.listen();
-   if ( mySerial.overflow() ) 
-   {
-        Serial.println("overflow");
-        while ( mySerial.available() )
-          mySerial.read();
-   }
-   else
+	char res[5];
+#ifdef __AVR__
+	mySerial.listen();
+	if (mySerial.overflow())
+	{
+		Serial.println("overflow");
+		while (mySerial.available())
+			mySerial.read();
+	}
+	else
 #endif  
-   {   
-     if (mySerial.available()) 
-     {
-        uint8_t c =mySerial.read();
-      
-      if (!NetworkIdOk){
-        sprintf(&res[0],"%02X",c);
-        Serial.write(res);
-        Serial.print(" ");
-        datareceived = true;
-        SearchNetworkIdDataCount++;
-      }     
-     if (SearchNetworkIdDataCount >1500 && !NetworkIdOk){
-        NetworkIdOk = true;
-        uint16_t YourNetworkId = idtosend-1;
-        sprintf(&res[0],"%02X",YourNetworkId);
-        Serial.println (F(""));
-        Serial.println (F("-----------------------------------------------------------")); 
-        Serial.println (F(""));
-        Serial.println (F("          Your network id is :"));
-        Serial.println (F(""));
-        Serial.print (F("                 0x"));
-        Serial.write(res);
-        Serial.println (F(""));
-        Serial.println (F(""));
-        Serial.println (F("-----------------------------------------------------------")); 
-     }
-      LastTimeReciveData =millis(); 
-     }
-   }
-   
+	{
+		if (mySerial.available())
+		{
+			uint8_t c = mySerial.read();
+
+			if (!NetworkIdOk) {
+				sprintf(&res[0], "%02X", c);
+				Serial.write(res);
+				Serial.print(" ");
+				datareceived = true;
+				SearchNetworkIdDataCount++;
+			}
+			if (SearchNetworkIdDataCount > 1500 && !NetworkIdOk) {
+				NetworkIdOk = true;
+				uint16_t YourNetworkId = curProbedNetId - 1;
+				sprintf(&res[0], "%02X", YourNetworkId);
+				Serial.println(F(""));
+				Serial.println(F("-----------------------------------------------------------"));
+				Serial.println(F(""));
+				Serial.println(F("          Your network id is :"));
+				Serial.println(F(""));
+				Serial.print(F("                 0x"));
+				Serial.write(res);
+				Serial.println(F(""));
+				Serial.println(F(""));
+				Serial.println(F("-----------------------------------------------------------"));
+			}
+			LastTimeReciveData = millis();
+		}
+	}
+
 #ifdef SEARCH_NETWORK_ID
-   if ((millis()-LastTimeReciveData  > 1000 ) && datareceived ){ 
-      Serial.println("");
-      datareceived = false;
-      SearchNetworkIdDataCount = 0;
-      ChangeSettings(idtosend++);
-   }
+	if ((millis() - LastTimeReciveData > 500) && datareceived) {
+		Serial.println("");
+		datareceived = false;
+		SearchNetworkIdDataCount = 0;
+		LastTimeReciveData = millis();
+		ChangeSettings(curProbedNetId++);
+	}
 
-   if (millis()-LastTimeReciveData  > 120000 ){
-       Serial.println("");
-       Serial.println("Timeout");
-      SearchNetworkIdDataCount = 0;
-      datareceived = false;
-      ChangeSettings(idtosend++);
-   }
-  #endif 
+	if (millis() - LastTimeReciveData > 120000) {
+		Serial.println("");
+		Serial.println("Timeout");
+		SearchNetworkIdDataCount = 0;
+		datareceived = false;
+		LastTimeReciveData = millis();
+		ChangeSettings(curProbedNetId++);
+	}
+#endif 
 
 }
 
 
-void ChangeSettings(uint16_t id){
-  byte Config[20];
-  char res[5];
-    
-  //byte checksum;
-  Config[1]=0xAA;  
-  Config[2]=0x5A;
-  Config[3]=0xB9; 
-  Config[4]=0x46; 
-  Config[5]=id>>8;
-  Config[6]=id;
-  Config[7]=0x00;
-  Config[8]=0x03; 
-  Config[9]=0x00; 
-  Config[10]=0x04; 
-  Config[11]=0x00;
-  Config[12]=Channel;
-  Config[13]=0x00;
-  Config[14]=0x00;
-  Config[15]=0x00;
-  Config[16]=0x12;
-  Config[17]=0x00;
-  Config[18] =0x0;
+void ChangeSettings(uint16_t id) {
+	byte Config[20];
+	char res[5];
 
-  //calculate Checksum
-  for(int i=1;i<17;i++){
-    Config[18] =Config[18] +Config[i];
-  }
-  
-  Serial.println (F(""));                   
-  Serial.print (F("Config "));
-  for(int i=1;i<19;i++){
-    sprintf(&res[0],"%02X",Config[i]);
-    Serial.print(res);
-    Serial.print(F(" "));    
-  }
-  Serial.println (F(""));                    
+	//byte checksum;
+	Config[1] = 0xAA;
+	Config[2] = 0x5A;
+	Config[3] = 0xB9;
+	Config[4] = 0x46;
+	Config[5] = id >> 8;
+	Config[6] = id;
+	Config[7] = 0x00;
+	Config[8] = 0x03;
+	Config[9] = 0x00;
+	Config[10] = 0x04;
+	Config[11] = 0x00;
+	Config[12] = Channel;
+	Config[13] = 0x00;
+	Config[14] = 0x00;
+	Config[15] = 0x00;
+	Config[16] = 0x12;
+	Config[17] = 0x00;
+	Config[18] = 0x0;
 
-  
-  digitalWrite(DO_SET, LOW);
-  delay(500);
+	//calculate Checksum
+	for (int i = 1;i < 17;i++) {
+		Config[18] = Config[18] + Config[i];
+	}
 
-  for(int i=1;i<19;i++){
+	Serial.println(F(""));
+	Serial.print(F("Config "));
+	for (int i = 1;i < 19;i++) {
+		sprintf(&res[0], "%02X", Config[i]);
+		Serial.print(res);
+		Serial.print(F(" "));
+	}
+	Serial.println(F(""));
 
-    mySerial.write(Config[i]);
-  }
- delay(1000);
- digitalWrite(DO_SET, HIGH);
- 
+
+	digitalWrite(DO_SET, LOW);
+	delay(25);
+
+	for (int i = 1;i < 19;i++) {
+		mySerial.write(Config[i]);
+	}
+	mySerial.flush();
+	delay(25);
+	digitalWrite(DO_SET, HIGH);
+
 }
 
-void querryversion(){
-  byte Config[20];
-  char res[5];
-    
-  //byte checksum;
-  Config[1]=0xAA;  
-  Config[2]=0x5D;
-  Config[3]=0x00; 
-  Config[4]=0x00; 
-  Config[5]=0x00;
-  Config[6]=0x00;
-  Config[7]=0x00;
-  Config[8]=0x00; 
-  Config[9]=0x00; 
-  Config[10]=0x00; 
-  Config[11]=0x00;
-  Config[12]=0x00;
-  Config[13]=0x00;
-  Config[14]=0x00;
-  Config[15]=0x00;
-  Config[16]=0x00;
-  Config[17]=0x00;
-  Config[18] =0x07;
-  
-  Serial.print (F("Querry version "));
-  for(int i=1;i<19;i++){
-    sprintf(&res[0],"%02X",Config[i]);
-    Serial.print(res);
-    Serial.print(" ");    
-  }
+void querryversion() {
+	byte Config[20];
+	char res[5];
 
-  Serial.println (F(""));
-  digitalWrite(DO_SET, LOW);
-  delay(500);
+	//byte checksum;
+	Config[1] = 0xAA;
+	Config[2] = 0x5D;
+	Config[3] = 0x00;
+	Config[4] = 0x00;
+	Config[5] = 0x00;
+	Config[6] = 0x00;
+	Config[7] = 0x00;
+	Config[8] = 0x00;
+	Config[9] = 0x00;
+	Config[10] = 0x00;
+	Config[11] = 0x00;
+	Config[12] = 0x00;
+	Config[13] = 0x00;
+	Config[14] = 0x00;
+	Config[15] = 0x00;
+	Config[16] = 0x00;
+	Config[17] = 0x00;
+	Config[18] = 0x07;
 
-  for(int i=1;i<19;i++){
+	Serial.print(F("Querry version "));
+	for (int i = 1;i < 19;i++) {
+		sprintf(&res[0], "%02X", Config[i]);
+		Serial.print(res);
+		Serial.print(" ");
+	}
 
-    mySerial.write(Config[i]);
-  }
- delay(1000);
- digitalWrite(DO_SET, HIGH);
- 
- 
+	Serial.println(F(""));
+	digitalWrite(DO_SET, LOW);
+	delay(500);
+
+	for (int i = 1;i < 19;i++) {
+
+		mySerial.write(Config[i]);
+	}
+	delay(1000);
+	digitalWrite(DO_SET, HIGH);
 }
