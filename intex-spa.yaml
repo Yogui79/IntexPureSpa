@@ -1,0 +1,175 @@
+esphome:
+  name: intex-spa
+  friendly_name: Intex Spa Controller
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+mqtt:
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery: true
+  discovery_retain: false
+
+logger:
+  level: DEBUG
+
+ota:
+  password: !secret ota_password
+
+uart:
+  id: lc12s
+  tx_pin: GPIO16
+  rx_pin: GPIO17
+  baud_rate: 9600
+
+# Custom component for Spa communication
+external_components:
+  - source: components
+
+# Include the custom Spa component
+spa:
+  id: my_spa
+  uart_id: lc12s
+  network_id: 0xFFFF  # Change to your network ID
+  channel: 0x48       # Change to your channel
+  model: 28458        # or 28442
+
+# Switches for controls
+switch:
+  - platform: template
+    name: "Spa Power"
+    id: spa_power
+    turn_on_action:
+      - spa.send_command: COMMAND_ON_OFF
+    turn_off_action:
+      - spa.send_command: COMMAND_ON_OFF
+
+  - platform: template
+    name: "Water Filter"
+    id: water_filter
+    turn_on_action:
+      - spa.send_command: COMMAND_WATER_FILTER
+    turn_off_action:
+      - spa.send_command: COMMAND_WATER_FILTER
+
+  - platform: template
+    name: "Bubble"
+    id: bubble
+    turn_on_action:
+      - spa.send_command: COMMAND_BUBBLE
+    turn_off_action:
+      - spa.send_command: COMMAND_BUBBLE
+
+  - platform: template
+    name: "Heater"
+    id: heater
+    turn_on_action:
+      - spa.send_command: COMMAND_HEATER
+    turn_off_action:
+      - spa.send_command: COMMAND_HEATER
+
+  - platform: template
+    name: "Water Jet"
+    id: water_jet
+    turn_on_action:
+      - spa.send_command: COMMAND_WATER_JET
+    turn_off_action:
+      - spa.send_command: COMMAND_WATER_JET
+
+  - platform: template
+    name: "Sanitizer"
+    id: sanitizer
+    turn_on_action:
+      - spa.send_command: COMMAND_SANITIZER
+    turn_off_action:
+      - spa.send_command: COMMAND_SANITIZER
+
+# Sensors for status
+sensor:
+  - platform: template
+    name: "Actual Temperature"
+    id: actual_temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "Setpoint Temperature"
+    id: setpoint_temp
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "Filter Time"
+    id: filter_time
+    unit_of_measurement: "h"
+
+  - platform: template
+    name: "Sanitizer Time"
+    id: sanitizer_time
+    unit_of_measurement: "h"
+
+binary_sensor:
+  - platform: template
+    name: "Communication with Pump"
+    id: comm_pump
+
+  - platform: template
+    name: "Power On"
+    id: power_on
+
+  - platform: template
+    name: "Heater On"
+    id: heater_on
+
+  - platform: template
+    name: "Water Filter On"
+    id: water_filter_on
+
+  - platform: template
+    name: "Bubble On"
+    id: bubble_on
+
+  - platform: template
+    name: "Water Jet On"
+    id: water_jet_on
+
+  - platform: template
+    name: "Sanitizer On"
+    id: sanitizer_on
+
+# Number for setpoints
+number:
+  - platform: template
+    name: "Setpoint Temperature"
+    id: setpoint_temp_control
+    min_value: 20
+    max_value: 40
+    step: 1
+    unit_of_measurement: "°C"
+    set_action:
+      - spa.set_temperature: !lambda "return x;"
+
+  - platform: template
+    name: "Filter Time"
+    id: filter_time_control
+    min_value: 0
+    max_value: 24
+    step: 1
+    unit_of_measurement: "h"
+    set_action:
+      - spa.set_filter_time: !lambda "return x;"
+
+  - platform: template
+    name: "Sanitizer Time"
+    id: sanitizer_time_control
+    min_value: 0
+    max_value: 24
+    step: 1
+    unit_of_measurement: "h"
+    set_action:
+      - spa.set_sanitizer_time: !lambda "return x;"
