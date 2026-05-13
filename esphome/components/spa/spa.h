@@ -2,6 +2,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+#include "esphome/core/automation.h"
 
 namespace esphome {
 namespace spa {
@@ -75,6 +76,18 @@ class Spa : public Component, public uart::UARTDevice {
 
   uint8_t used_channel_;
   uint8_t first_command_char_;
+};
+
+template<typename... Ts> class SpaSendCommandAction : public Action<Ts...> {
+ public:
+  SpaSendCommandAction(Spa *parent) : parent_(parent) {}
+  void set_parent(Spa *parent) { this->parent_ = parent; }
+  TEMPLATABLE_VALUE(uint16_t, command)
+
+  void play(Ts... x) override { this->parent_->send_command(this->command_.value(x...)); }
+
+ protected:
+  Spa *parent_;
 };
 
 }  // namespace spa

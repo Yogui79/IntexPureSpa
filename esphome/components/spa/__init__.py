@@ -2,6 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart
 from esphome.const import CONF_ID
+from esphome import automation
 
 DEPENDENCIES = ["uart"]
 AUTO_LOAD = ["binary_sensor", "sensor", "switch", "number"]
@@ -21,6 +22,21 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_MODEL): cv.one_of(28458, 28442, int=True),
     }
 ).extend(uart.UART_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
+
+SpaSendCommandAction = spa_ns.class_("SpaSendCommandAction", automation.Action)
+
+@automation.register_action("spa.send_command", SpaSendCommandAction, cv.Schema({
+    cv.Required(CONF_ID): cv.use_id(Spa),
+    cv.Required("command"): cv.templatable(cv.hex_uint16_t),
+}))
+
+async def spa_send_command_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    parent = await cg.get_variable(config[CONF_ID])
+    cg.add(var.set_parent(parent))
+    template_ = await cg.templatable(config["command"], args, cg.uint16)
+    cg.add(var.set_command(template_))
+    return var
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])

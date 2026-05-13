@@ -45,9 +45,13 @@ switch:
     name: "Spa Power"
     id: spa_power
     turn_on_action:
-      - spa.send_command: COMMAND_ON_OFF
+      - spa.send_command:
+          id: my_spa
+          command: 0x0001
     turn_off_action:
-      - spa.send_command: COMMAND_ON_OFF
+      - spa.send_command:
+          id: my_spa
+          command: 0x0001
 
   - platform: template
     name: "Water Filter"
