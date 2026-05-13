@@ -90,5 +90,41 @@ template<typename... Ts> class SpaSendCommandAction : public Action<Ts...> {
   Spa *parent_;
 };
 
+template<typename... Ts> class SpaSetTemperatureAction : public Action<Ts...> {
+ public:
+  SpaSetTemperatureAction(Spa *parent) : parent_(parent) {}
+  void set_parent(Spa *parent) { this->parent_ = parent; }
+  TEMPLATABLE_VALUE(float, temperature)
+
+  void play(Ts... x) override { this->parent_->set_temperature(this->temperature_.value(x...)); }
+
+ protected:
+  Spa *parent_;
+};
+
+template<typename... Ts> class SpaSetFilterTimeAction : public Action<Ts...> {
+ public:
+  SpaSetFilterTimeAction(Spa *parent) : parent_(parent) {}
+  void set_parent(Spa *parent) { this->parent_ = parent; }
+  TEMPLATABLE_VALUE(uint8_t, hours)
+
+  void play(Ts... x) override { this->parent_->set_filter_time(this->hours_.value(x...)); }
+
+ protected:
+  Spa *parent_;
+};
+
+template<typename... Ts> class SpaSetSanitizerTimeAction : public Action<Ts...> {
+ public:
+  SpaSetSanitizerTimeAction(Spa *parent) : parent_(parent) {}
+  void set_parent(Spa *parent) { this->parent_ = parent; }
+  TEMPLATABLE_VALUE(uint8_t, hours)
+
+  void play(Ts... x) override { this->parent_->set_sanitizer_time(this->hours_.value(x...)); }
+
+ protected:
+  Spa *parent_;
+};
+
 }  // namespace spa
 }  // namespace esphome

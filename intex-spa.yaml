@@ -57,41 +57,61 @@ switch:
     name: "Water Filter"
     id: water_filter
     turn_on_action:
-      - spa.send_command: COMMAND_WATER_FILTER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0010
     turn_off_action:
-      - spa.send_command: COMMAND_WATER_FILTER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0010
 
   - platform: template
     name: "Bubble"
     id: bubble
     turn_on_action:
-      - spa.send_command: COMMAND_BUBBLE
+      - spa.send_command:
+          id: my_spa
+          command: 0x0020
     turn_off_action:
-      - spa.send_command: COMMAND_BUBBLE
+      - spa.send_command:
+          id: my_spa
+          command: 0x0020
 
   - platform: template
     name: "Heater"
     id: heater
     turn_on_action:
-      - spa.send_command: COMMAND_HEATER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0040
     turn_off_action:
-      - spa.send_command: COMMAND_HEATER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0040
 
   - platform: template
     name: "Water Jet"
     id: water_jet
     turn_on_action:
-      - spa.send_command: COMMAND_WATER_JET
+      - spa.send_command:
+          id: my_spa
+          command: 0x0100
     turn_off_action:
-      - spa.send_command: COMMAND_WATER_JET
+      - spa.send_command:
+          id: my_spa
+          command: 0x0100
 
   - platform: template
     name: "Sanitizer"
     id: sanitizer
     turn_on_action:
-      - spa.send_command: COMMAND_SANITIZER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0080
     turn_off_action:
-      - spa.send_command: COMMAND_SANITIZER
+      - spa.send_command:
+          id: my_spa
+          command: 0x0080
 
 # Sensors for status
 sensor:
@@ -156,7 +176,9 @@ number:
     step: 1
     unit_of_measurement: "°C"
     set_action:
-      - spa.set_temperature: !lambda "return x;"
+      - spa.set_temperature:
+          id: my_spa
+          temperature: !lambda "return x;"
 
   - platform: template
     name: "Filter Time"
@@ -166,7 +188,9 @@ number:
     step: 1
     unit_of_measurement: "h"
     set_action:
-      - spa.set_filter_time: !lambda "return x;"
+      - spa.set_filter_time:
+          id: my_spa
+          hours: !lambda "return x;"
 
   - platform: template
     name: "Sanitizer Time"
@@ -176,4 +200,6 @@ number:
     step: 1
     unit_of_measurement: "h"
     set_action:
-      - spa.set_sanitizer_time: !lambda "return x;"
+      - spa.set_sanitizer_time:
+          id: my_spa
+          hours: !lambda "return x;"
