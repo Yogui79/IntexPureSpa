@@ -80,11 +80,12 @@ class Spa : public Component, public uart::UARTDevice {
 
 template<typename... Ts> class SpaSendCommandAction : public Action<Ts...> {
  public:
+  SpaSendCommandAction() {}
   SpaSendCommandAction(Spa *parent) : parent_(parent) {}
   void set_parent(Spa *parent) { this->parent_ = parent; }
   TEMPLATABLE_VALUE(uint16_t, command)
 
-  void play(Ts... x) override { this->parent_->send_command(this->command_.value(x...)); }
+  void play(const Ts &...x) override { this->parent_->send_command(this->command_.value(x...)); }
 
  protected:
   Spa *parent_;
@@ -92,11 +93,12 @@ template<typename... Ts> class SpaSendCommandAction : public Action<Ts...> {
 
 template<typename... Ts> class SpaSetTemperatureAction : public Action<Ts...> {
  public:
+  SpaSetTemperatureAction() {}
   SpaSetTemperatureAction(Spa *parent) : parent_(parent) {}
   void set_parent(Spa *parent) { this->parent_ = parent; }
   TEMPLATABLE_VALUE(float, temperature)
 
-  void play(Ts... x) override { this->parent_->set_temperature(this->temperature_.value(x...)); }
+  void play(const Ts &...x) override { this->parent_->set_temperature(this->temperature_.value(x...)); }
 
  protected:
   Spa *parent_;
@@ -104,11 +106,12 @@ template<typename... Ts> class SpaSetTemperatureAction : public Action<Ts...> {
 
 template<typename... Ts> class SpaSetFilterTimeAction : public Action<Ts...> {
  public:
+  SpaSetFilterTimeAction() {}
   SpaSetFilterTimeAction(Spa *parent) : parent_(parent) {}
   void set_parent(Spa *parent) { this->parent_ = parent; }
   TEMPLATABLE_VALUE(uint8_t, hours)
 
-  void play(Ts... x) override { this->parent_->set_filter_time(this->hours_.value(x...)); }
+  void play(const Ts &...x) override { this->parent_->set_filter_time(this->hours_.value(x...)); }
 
  protected:
   Spa *parent_;
@@ -116,11 +119,12 @@ template<typename... Ts> class SpaSetFilterTimeAction : public Action<Ts...> {
 
 template<typename... Ts> class SpaSetSanitizerTimeAction : public Action<Ts...> {
  public:
+  SpaSetSanitizerTimeAction() {}
   SpaSetSanitizerTimeAction(Spa *parent) : parent_(parent) {}
   void set_parent(Spa *parent) { this->parent_ = parent; }
   TEMPLATABLE_VALUE(uint8_t, hours)
 
-  void play(Ts... x) override { this->parent_->set_sanitizer_time(this->hours_.value(x...)); }
+  void play(const Ts &...x) override { this->parent_->set_sanitizer_time(this->hours_.value(x...)); }
 
  protected:
   Spa *parent_;
