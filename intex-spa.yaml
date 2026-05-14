@@ -180,26 +180,37 @@ number:
           id: my_spa
           temperature: !lambda "return x;"
 
+select:
   - platform: template
     name: "Filter Time"
     id: filter_time_control
-    min_value: 0
-    max_value: 24
-    step: 1
-    unit_of_measurement: "h"
+    options:
+      - "2 hours"
+      - "4 hours"
+      - "6 hours"
+    optimistic: true
     set_action:
       - spa.set_filter_time:
           id: my_spa
-          hours: !lambda "return x;"
+          hours: !lambda |
+            if (x == "2 hours") return 2;
+            if (x == "4 hours") return 4;
+            if (x == "6 hours") return 6;
+            return 2;  // default
 
   - platform: template
     name: "Sanitizer Time"
     id: sanitizer_time_control
-    min_value: 0
-    max_value: 24
-    step: 1
-    unit_of_measurement: "h"
+    options:
+      - "3 hours"
+      - "5 hours"
+      - "8 hours"
+    optimistic: true
     set_action:
       - spa.set_sanitizer_time:
           id: my_spa
-          hours: !lambda "return x;"
+          hours: !lambda |
+            if (x == "3 hours") return 3;
+            if (x == "5 hours") return 5;
+            if (x == "8 hours") return 8;
+            return 3;  // default
